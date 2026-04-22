@@ -1,0 +1,541 @@
+/* =========================================
+   1. VARIABLES & GLOBAL RESET (DEFENCE THEME)
+   ========================================= */
+:root {
+  /* Primary Theme: Army Olive Green */
+  --primary-color: #4B5320;      /* Classic Army Green */
+  --primary-dark: #2F3512;       /* Darker Olive for Hover */
+  
+  /* Accent: Tactical Sand/Gold */
+  --accent-color: #C19A6B;       
+  
+  /* Backgrounds */
+  --bg-gray: #F0F2EB;            /* Light Greenish-Gray tint */
+  --white: #ffffff;
+  
+  /* Text */
+  --text-dark: #1F2421;          /* Almost Black */
+  --text-gray: #555555;
+  --border-color: #D1D5CB;       /* Greenish Grey Border */
+  
+  --sidebar-width: 280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-gray);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.home-container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* =========================================
+   2. HERO SECTION (SLIDER)
+   ========================================= */
+.hero-section {
+  background: var(--white);
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border-bottom: 4px solid var(--primary-color); /* Defence Accent */
+}
+
+.hero-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.hero-slide {
+  height: 280px;
+  border-radius: 8px; /* Slightly sharper corners */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.5s ease;
+  /* Tactical Overlay */
+  box-shadow: inset 0 0 100px rgba(47, 53, 18, 0.6); 
+}
+
+.hero-content {
+  z-index: 2;
+  max-width: 600px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  text-transform: uppercase; /* Military style typography */
+  letter-spacing: 1px;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.95;
+  margin-bottom: 1.5rem;
+}
+
+/* Tactical Button Style */
+.hero-cta {
+  background: var(--white);
+  color: var(--primary-color);
+  border: 2px solid var(--white);
+  padding: 12px 28px;
+  font-weight: 800;
+  border-radius: 4px; /* Boxy look */
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hero-cta:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.hero-emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.hero-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  background: var(--accent-color); /* Sand/Gold active dot */
+  transform: scale(1.2);
+}
+
+/* =========================================
+   3. MAIN CONTENT LAYOUT
+   ========================================= */
+.main-content-section {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem 1rem;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 24px;
+  position: relative;
+  align-items: flex-start;
+}
+
+/* =========================================
+   4. SIDEBAR STYLES
+   ========================================= */
+.filter-sidebar {
+  width: var(--sidebar-width);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  flex-shrink: 0;
+  position: sticky;
+  top: 20px; 
+  border-top: 5px solid var(--primary-color); /* Top Green Border */
+}
+
+.filter-header-mobile {
+  display: none; 
+}
+
+.filter-group {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-group:last-of-type {
+  border-bottom: none;
+}
+
+.filter-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--primary-color); /* Green Titles */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Category List */
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px; /* Added padding for hover effect */
+  cursor: pointer;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.category-item:hover, 
+.category-item.active {
+  color: var(--primary-color);
+  font-weight: 700;
+  background-color: #EFF5E6; /* Light green hover bg */
+}
+
+.arrow {
+  font-size: 0.8rem;
+  color: #999;
+  transition: transform 0.3s;
+}
+
+.category-item.expanded .arrow {
+  transform: rotate(180deg);
+}
+
+/* Subcategories */
+.subcategory-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-left: 0.5rem;
+}
+
+.subcategory-list.open {
+  max-height: 500px; 
+}
+
+.subcategory-item {
+  padding: 8px 0 8px 24px;
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.subcategory-item:hover {
+  color: var(--primary-color);
+  border-left-color: var(--primary-color);
+  background: #EFF5E6;
+  font-weight: 600;
+}
+
+/* Checkboxes (Army Style) */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  position: relative;
+  padding-left: 30px;
+}
+
+.custom-checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #fff;
+  border: 2px solid #ccc; /* Thicker border */
+  border-radius: 3px;     /* Square corners */
+  transition: all 0.2s;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+  border-color: var(--primary-color);
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+  display: block;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.stars {
+  color: var(--accent-color); /* Sand color stars */
+  margin-right: 5px;
+}
+
+/* Reset Button */
+.reset-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 10px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.reset-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* =========================================
+   5. PRODUCTS MAIN AREA & HEADER
+   ========================================= */
+.products-main {
+  flex-grow: 1;
+  width: 100%; 
+}
+
+/* Header Bar */
+.products-header-bar {
+  background: var(--white);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-left: 6px solid var(--primary-color); /* Green stripe */
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.products-header-bar h2 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.product-count {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+}
+
+/* Header Actions & Sort */
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-label {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.sort-dropdown {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--white);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  outline: none;
+  min-width: 160px;
+}
+
+.sort-dropdown:hover {
+  border-color: var(--primary-color);
+}
+
+.toggle-filter-btn {
+  display: none; 
+}
+
+/* Products Grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* Optional: Product Card Hover override if cards are not separate components */
+.product-card {
+  transition: all 0.3s;
+}
+.product-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 10px 20px rgba(75, 83, 32, 0.15); /* Greenish shadow */
+}
+
+/* Empty State & Loading */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 8px;
+  color: var(--text-gray);
+  border-top: 4px solid var(--border-color);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* =========================================
+   6. RESPONSIVE DESIGN (MOBILE)
+   ========================================= */
+@media (max-width: 992px) {
+  .hero-slide {
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-slide {
+    height: 200px;
+    padding: 0 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .products-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sort-label {
+    display: none; 
+  }
+
+  /* Sidebar Toggle Logic (Tactical Button) */
+  .toggle-filter-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 4px 0 var(--primary-dark);
+  }
+  
+  .toggle-filter-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+
+  /* Mobile Sidebar Drawer */
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%; 
+    height: 100vh;
+    width: 85%;
+    max-width: 320px;
+    z-index: 1000;
+    overflow-y: auto;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 20px rgba(0,0,0,0.1);
+  }
+
+  .filter-sidebar.show {
+    left: 0;
+  }
+
+  .filter-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+  }
+  
+  .filter-header-mobile h3 {
+    margin: 0;
+    color: var(--primary-color);
+    text-transform: uppercase;
+  }
+
+  .filter-header-mobile button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-gray);
+  }
+}

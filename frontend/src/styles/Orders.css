@@ -1,0 +1,135 @@
+.orders-container {
+  padding: 20px 0;
+}
+
+.orders-container h1 {
+  margin-bottom: 30px;
+}
+
+.no-orders {
+  background-color: white;
+  padding: 60px 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.orders-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.order-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.order-number {
+  font-weight: bold;
+  color: #D4AF37;
+  font-size: 16px;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.status.pending {
+  background-color: #ffa500;
+}
+
+.status.confirmed {
+  background-color: #2196f3;
+}
+
+.status.processing {
+  background-color: #9c27b0;
+}
+
+.status.shipped {
+  background-color: #ff9800;
+}
+
+.status.delivered {
+  background-color: #6B8E23;
+}
+
+.status.cancelled {
+  background-color: #d32f2f;
+}
+
+.order-details {
+  margin-bottom: 20px;
+}
+
+.detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.detail label {
+  color: #666;
+  font-weight: 500;
+}
+
+.order-items {
+  margin: 20px 0;
+  padding: 15px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.order-items h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.order-items ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.order-items li {
+  padding: 5px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.order-address {
+  margin-top: 15px;
+}
+
+.order-address h4 {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.order-address p {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .orders-list {
+    grid-template-columns: 1fr;
+  }
+}

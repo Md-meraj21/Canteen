@@ -1,0 +1,115 @@
+.confirmation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.confirmation-card {
+  background-color: white;
+  padding: 40px;
+  border-radius: 8px;
+  max-width: 600px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.confirmation-card h1 {
+  color: #D4AF37;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.confirmation-card > p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.confirmation-details {
+  text-align: left;
+  margin: 30px 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row span {
+  font-size: 14px;
+}
+
+.order-number {
+  font-weight: bold;
+  color: #D4AF37;
+}
+
+.status-badge {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.next-steps {
+  text-align: left;
+  margin: 30px 0;
+}
+
+.next-steps h3 {
+  margin-bottom: 15px;
+}
+
+.next-steps ol {
+  padding-left: 20px;
+}
+
+.next-steps li {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.btn-track, .btn-shop {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.btn-track {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-track:hover {
+  background-color: #4F7942;
+}
+
+.btn-shop {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-shop:hover {
+  background-color: #e0e0e0;
+}

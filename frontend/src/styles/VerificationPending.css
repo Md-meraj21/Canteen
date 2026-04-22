@@ -1,0 +1,413 @@
+.verification-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3D4A2F 0%, #4F7942 100%);
+  padding: 20px;
+}
+
+.verification-card {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.verification-icon-success {
+  font-size: 80px;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: scaleIn 0.6s ease-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.verification-card h1 {
+  color: #3D4A2F;
+  margin-bottom: 10px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.verification-card h2 {
+  color: #6B8E23;
+  font-size: 18px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.verification-content {
+  margin-top: 20px;
+}
+
+.success-box {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border-left: 5px solid #28a745;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.success-message {
+  font-size: 18px;
+  color: #155724;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.email-display {
+  color: #155724;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Processing Steps */
+.processing-section {
+  margin: 30px 0;
+}
+
+.processing-steps {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.step {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.step.completed {
+  background: #f0f8f5;
+  border-left-color: #28a745;
+}
+
+.step.active {
+  background: #f0f4e8;
+  border-left-color: #6B8E23;
+  box-shadow: 0 2px 8px rgba(107, 142, 35, 0.1);
+}
+
+.step-number {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 18px;
+  color: #6B8E23;
+  border: 2px solid #6B8E23;
+}
+
+.step.completed .step-number {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.step.active .step-number {
+  background: #6B8E23;
+  color: white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.step-content h4 {
+  margin: 0 0 3px 0;
+  font-size: 14px;
+  color: #3D4A2F;
+}
+
+.step-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.step-connector {
+  height: 20px;
+  margin-left: 18px;
+  border-left: 3px dashed #ddd;
+}
+
+/* Processing Status Bar */
+.processing-status {
+  margin: 25px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.status-bar {
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.status-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6B8E23, #D4AF37);
+  border-radius: 10px;
+  width: 60%;
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% { width: 20%; }
+  50% { width: 70%; }
+  100% { width: 60%; }
+}
+
+.status-text {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Info Boxes */
+.info-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.info-box,
+.time-box,
+.contact-box {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #D4AF37;
+}
+
+.info-box h3,
+.time-box h3,
+.contact-box h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #3D4A2F;
+  font-size: 14px;
+}
+
+.info-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-box li {
+  padding: 5px 0;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.4;
+}
+
+.time-box {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.time-box p {
+  margin: 5px 0;
+  font-size: 12px;
+}
+
+.time-box strong {
+  color: #6B8E23;
+  font-size: 24px;
+  display: block;
+  margin: 10px 0;
+}
+
+.small-text {
+  color: #999;
+  font-size: 11px;
+}
+
+.contact-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.contact-box p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.contact-box strong {
+  color: #3D4A2F;
+  font-weight: 700;
+}
+
+/* Redirect Info */
+.redirect-info {
+  text-align: center;
+  padding: 15px;
+  background: #fffbf0;
+  border-left: 4px solid #D4AF37;
+  border-radius: 6px;
+  margin: 20px 0;
+}
+
+.countdown-text {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.countdown-text strong {
+  color: #6B8E23;
+  font-size: 18px;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn-back,
+.btn-home {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-back {
+  background: linear-gradient(135deg, #6B8E23, #4F7942);
+  color: white;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(107, 142, 35, 0.3);
+}
+
+.btn-home {
+  background: linear-gradient(135deg, #D4AF37, #C9A961);
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.btn-home:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .verification-card {
+    padding: 30px 20px;
+  }
+
+  .verification-card h1 {
+    font-size: 20px;
+  }
+
+  .verification-card h2 {
+    font-size: 16px;
+  }
+
+  .info-boxes {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn-back,
+  .btn-home {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .verification-card {
+    padding: 20px 15px;
+  }
+
+  .verification-icon-success {
+    font-size: 60px;
+  }
+
+  .verification-card h1 {
+    font-size: 18px;
+  }
+
+  .success-message {
+    font-size: 16px;
+  }
+
+  .step {
+    padding: 12px;
+  }
+
+  .step-content h4 {
+    font-size: 13px;
+  }
+
+  .step-content p {
+    font-size: 11px;
+  }
+
+  .info-box h3,
+  .time-box h3,
+  .contact-box h3 {
+    font-size: 13px;
+  }
+
+  .info-box li,
+  .contact-box p {
+    font-size: 11px;
+  }
+
+  .time-box strong {
+    font-size: 20px;
+  }
+
+  .countdown-text {
+    font-size: 13px;
+  }
+
+  .countdown-text strong {
+    font-size: 16px;
+  }
+}
