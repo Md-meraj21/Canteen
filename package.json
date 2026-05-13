@@ -11,7 +11,15 @@
     "frontend": "cd frontend && npm start",
     "build": "cd frontend && npm run build"
   },
-  "keywords": ["ecommerce", "mern", "flipkart", "shopping", "nodejs", "react", "mongodb"],
+  "keywords": [
+    "ecommerce",
+    "mern",
+    "flipkart",
+    "shopping",
+    "nodejs",
+    "react",
+    "mongodb"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {

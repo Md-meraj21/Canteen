@@ -7,7 +7,7 @@ import '../styles/Auth.css';
 function Login() {
   const navigate = useNavigate();
   const { setUser, setToken } = useAuthStore();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ identifier: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,10 +22,16 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await authAPI.login(formData);
+      const loginId = formData.identifier.trim();
+      const response = await authAPI.login({
+        identifier: loginId,
+        email: loginId,
+        username: loginId,
+        password: formData.password,
+      });
       setUser(response.data.user);
       setToken(response.data.token);
-      navigate('/');
+      navigate(response.data.user?.role === 'admin' ? '/admin' : '/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -40,10 +46,11 @@ function Login() {
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
+            type="text"
+            inputMode="email"
+            name="identifier"
+            placeholder="Username or Email"
+            value={formData.identifier}
             onChange={handleChange}
             required
           />

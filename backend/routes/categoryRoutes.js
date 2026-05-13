@@ -64,9 +64,6 @@ router.put('/:id', protect, admin, async (req, res) => {
   }
 });
 
-// @route   DELETE /api/categories/:id
-// @desc    Delete a category
-// @access  Private/Admin
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -74,7 +71,7 @@ router.delete('/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    await category.remove();
+    await Category.deleteOne({ _id: req.params.id });
     res.json({ message: 'Category removed' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

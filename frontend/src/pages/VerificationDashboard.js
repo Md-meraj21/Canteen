@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usersAPI } from '../services/api';
 import '../styles/VerificationDashboard.css';
 
@@ -8,11 +8,7 @@ function VerificationDashboard() {
   const [loading, setLoading] = useState(false);
   const [notes, setNotes] = useState({});
 
-  useEffect(() => {
-    fetchPendingUsers();
-  }, [filter]);
-
-  const fetchPendingUsers = async () => {
+  const fetchPendingUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await usersAPI.getPendingUsers(filter);
@@ -24,7 +20,11 @@ function VerificationDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchPendingUsers();
+  }, [fetchPendingUsers]);
 
   const handleVerify = async (userId, approved) => {
     try {

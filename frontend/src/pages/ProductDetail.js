@@ -60,12 +60,16 @@ function ProductDetail() {
   if (error) return <div className="error">❌ {error}</div>;
   if (!product) return <div className="error">❌ Product not found</div>;
 
+  const images = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : [`https://via.placeholder.com/700x700?text=${encodeURIComponent(product.name || 'Product')}`];
+
   return (
     <div className="product-detail">
       <div className="product-images">
-        <img src={product.images[0]} alt={product.name} className="main-image" />
+        <img src={images[0]} alt={product.name} className="main-image" />
         <div className="thumbnail-images">
-          {product.images.map((img, idx) => (
+          {images.map((img, idx) => (
             <img key={idx} src={img} alt={`View ${idx}`} />
           ))}
         </div>

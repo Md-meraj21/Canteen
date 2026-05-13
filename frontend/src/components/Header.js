@@ -65,8 +65,9 @@ function Header() {
                 <div className="user-info">{user.name}</div>
                 <Link to="/profile" className="dropdown-item">👤 Profile</Link>
                 <Link to="/orders" className="dropdown-item">📦 Orders</Link>
-                {user.email === 'seller@shopkaro.com' && (
+                {user.role === 'admin' && (
                   <>
+                    <Link to="/admin" className="dropdown-item admin">Dashboard</Link>
                     <Link to="/admin/orders" className="dropdown-item admin">📊 Admin Orders</Link>
                     <Link to="/admin/verification" className="dropdown-item admin">🎖️ Verify Users</Link>
                   </>

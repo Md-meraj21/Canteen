@@ -18,7 +18,8 @@ const createAdminUser = async () => {
     const adminUser = new User({
       name: 'Shop Karo Store',
       email: 'seller@shopkaro.com',
-      phone: '+91-9999999999',
+      username: 'admin',
+      phone: '+91-1234567890',
       password: 'seller123', // This will be hashed by the pre-save hook
       role: 'admin'
     });

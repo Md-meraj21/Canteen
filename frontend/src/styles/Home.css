@@ -156,6 +156,10 @@ body {
   align-items: flex-start;
 }
 
+.filter-backdrop {
+  display: none;
+}
+
 /* =========================================
    4. SIDEBAR STYLES
    ========================================= */
@@ -199,6 +203,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  border: 0;
+  background: transparent;
   padding: 8px 10px; /* Added padding for hover effect */
   cursor: pointer;
   color: var(--text-dark);
@@ -382,6 +389,12 @@ body {
   align-items: center;
 }
 
+.products-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .sort-container {
   display: flex;
   align-items: center;
@@ -411,13 +424,13 @@ body {
 }
 
 .toggle-filter-btn {
-  display: none; 
+  display: none;
 }
 
 /* Products Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
 }
 
@@ -453,9 +466,25 @@ body {
   .hero-slide {
     padding: 0 2rem;
   }
+
+  .content-wrapper {
+    gap: 16px;
+  }
+
+  .filter-sidebar {
+    width: 240px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
+  .main-content-section {
+    padding: 0 0.75rem 1.5rem;
+  }
+
   .hero-slide {
     height: 200px;
     padding: 0 1.5rem;
@@ -471,7 +500,7 @@ body {
     gap: 15px;
   }
   
-  .header-actions {
+  .products-actions {
     width: 100%;
     justify-content: space-between;
   }
@@ -513,6 +542,15 @@ body {
     box-shadow: 10px 0 20px rgba(0,0,0,0.1);
   }
 
+  .filter-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    border: 0;
+    background: rgba(15, 23, 15, 0.38);
+  }
+
   .filter-sidebar.show {
     left: 0;
   }
@@ -537,5 +575,54 @@ body {
     border: none;
     font-size: 1.5rem;
     color: var(--text-gray);
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 0.75rem 0;
+  }
+
+  .hero-slide {
+    height: 170px;
+    padding: 0 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.15rem;
+    line-height: 1.25;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .hero-emoji {
+    font-size: 2rem;
+  }
+
+  .hero-cta {
+    padding: 9px 16px;
+    width: auto;
+  }
+
+  .products-header-bar {
+    padding: 0.85rem;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sort-dropdown,
+  .toggle-filter-btn {
+    flex: 1;
+    min-width: 0;
   }
 }

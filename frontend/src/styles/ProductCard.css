@@ -144,8 +144,15 @@
 }
 
 @media (max-width: 480px) {
+  .product-card {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    min-height: 150px;
+  }
+
   .product-image {
-    height: 140px;
+    height: 100%;
+    min-height: 150px;
   }
 
   .product-info {
@@ -154,10 +161,17 @@
 
   .product-info h3 {
     font-size: 12px;
+    min-height: auto;
   }
 
   .current-price {
     font-size: 14px;
+  }
+
+  .rating,
+  .stock,
+  .category {
+    margin-bottom: 4px;
   }
 }
 

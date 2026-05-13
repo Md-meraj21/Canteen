@@ -7,18 +7,32 @@ const router = express.Router();
 // Register User
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, phone, password, militaryId, rank } = req.body;
+    const { name, email, username, phone, password, militaryId, rank } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedUsername = username?.trim().toLowerCase();
+
+    if (!name || !normalizedEmail || !normalizedUsername || !phone || !password) {
+      return res.status(400).json({ error: 'Name, username, email, phone, and password are required' });
+    }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [
+        { email: normalizedEmail },
+        { username: normalizedUsername }
+      ]
+    });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({
+        error: existingUser.email === normalizedEmail ? 'Email already registered' : 'Username already taken'
+      });
     }
 
     // Create new user
     const user = new User({ 
       name, 
-      email, 
+      email: normalizedEmail,
+      username: normalizedUsername,
       phone, 
       password,
       militaryId,
@@ -35,6 +49,7 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         verificationStatus: user.verificationStatus
       }
     });
@@ -46,21 +61,22 @@ router.post('/register', async (req, res) => {
 // Login User
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, email, username, password } = req.body;
+    const loginId = (identifier || email || username || '').trim().toLowerCase();
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+    if (!loginId || !password) {
+      return res.status(400).json({ error: 'Username/email and password required' });
     }
 
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({
+      $or: [
+        { email: loginId },
+        { username: loginId }
+      ]
+    }).select('+password');
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Block login if not verified, except for admin
-    if (user.role !== 'admin' && user.verificationStatus !== 'verified') {
-      return res.status(403).json({ error: 'Account not verified. Please wait for admin approval.' });
     }
 
     const isPasswordValid = await user.matchPassword(password);
@@ -81,6 +97,7 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         role: user.role,
         verificationStatus: user.verificationStatus
       }

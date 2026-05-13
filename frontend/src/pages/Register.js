@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
-import { useAuthStore } from '../context/store';
 import '../styles/Auth.css';
 
 function Register() {
   const navigate = useNavigate();
-  const { setUser, setToken } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
     phone: '',
     password: '',
     militaryId: '',
     rank: ''
   });
-  const [idCardImage, setIdCardImage] = useState(null);
   const [idCardPreview, setIdCardPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,7 +26,6 @@ function Register() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setIdCardImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         // Compress image before saving
@@ -69,6 +66,7 @@ function Register() {
       // Prepare form data
       const dataToSend = {
         name: formData.name,
+        username: formData.username,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
@@ -77,7 +75,8 @@ function Register() {
         idCardImage: idCardPreview || null // Send base64 string directly
       };
 
-      const response = await authAPI.register(dataToSend);
+      await authAPI.register(dataToSend);
+      localStorage.setItem('pendingRegistrationEmail', formData.email);
       // Don't auto login - user needs verification first
       navigate('/verification-pending', { state: { email: formData.email } });
     } catch (err) {
@@ -103,7 +102,19 @@ function Register() {
             required
           />
           <input
-            type="email"
+            type="text"
+            name="username"
+            placeholder="Unique Username"
+            value={formData.username}
+            onChange={handleChange}
+            minLength="3"
+            pattern="[A-Za-z0-9_]+"
+            title="Only letters, numbers, and underscores are allowed"
+            required
+          />
+          <input
+            type="text"
+            inputMode="email"
             name="email"
             placeholder="Email"
             value={formData.email}

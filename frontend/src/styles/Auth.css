@@ -10,11 +10,13 @@
   background-color: white;
   padding: 40px;
   border-radius: 8px;
+  width: min(100%, 420px);
   max-width: 400px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .auth-card-military {
+  width: min(100%, 560px);
   max-width: 500px;
   background: linear-gradient(135deg, #fff 0%, #f9fdf7 100%);
   border-left: 5px solid #D4AF37;
@@ -157,6 +159,7 @@
 @media (max-width: 768px) {
   .auth-card {
     padding: 30px 20px;
+    width: 100%;
     max-width: 100%;
   }
 
