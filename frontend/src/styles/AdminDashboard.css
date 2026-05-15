@@ -7,10 +7,10 @@
 }
 
 .admin-sidebar {
-  background: #1f3d2b;
+  background: #366a4b;
   color: #fff;
   padding: 28px 22px;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 28px;
 }
@@ -241,7 +241,6 @@
   max-width: 360px;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
 }
 
 .admin-loading {

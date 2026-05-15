@@ -26,6 +26,7 @@ export default defineConfig({
     },
   },
   server: {
+    allowedHosts: ['canteen-2-du5y.onrender.com'] ,
     port: 3000,
     proxy: {
       "/api": "http://localhost:5000",
