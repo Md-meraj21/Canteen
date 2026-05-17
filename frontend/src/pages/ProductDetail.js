@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { productsAPI, cartAPI } from '../services/api';
 import { useAuthStore, useCartStore } from '../context/store';
 import '../styles/ProductDetail.css';
+import Button from '@mui/material/Button';
+
+
 
 function ProductDetail() {
   const { id } = useParams();
@@ -138,9 +141,9 @@ function ProductDetail() {
             <label>Quantity:</label>
             <div className="quantity-controls">
               <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="qty-btn">−</button>
-              <input 
-                type="number" 
-                value={quantity} 
+              <input
+                type="number"
+                value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 min="1"
                 max={product.stock}
@@ -148,14 +151,16 @@ function ProductDetail() {
               <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="qty-btn">+</button>
             </div>
           </div>
-          
-          <button 
-            className="add-to-cart" 
-            onClick={handleAddToCart} 
+
+          <Button
+            variant="contained"
+             color="success"
+            className="add-to-cart"
+            onClick={handleAddToCart}
             disabled={product.stock === 0}
           >
             {product.stock === 0 ? '✗ Out of Stock' : '🛒 Add to Cart'}
-          </button>
+          </Button>
 
           {!user && (
             <p className="login-hint">💡 You need to login to purchase this item</p>

@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap');
-
+@import "tailwindcss";
  .header {
   background: linear-gradient(135deg, #4b7c53 0%, #34623b 100%);
   box-shadow: 0 4px 20px rgba(53, 94, 59, 0.2);
