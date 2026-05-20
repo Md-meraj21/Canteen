@@ -11,7 +11,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: [process.env.FRONTEND_URL || 'http://localhost:3000',
-    // "https://canteen-yuvg.onrender.com"
+    "https://canteen-3-bj2x.onrender.com/"
     ],
   credentials: true
 }));
