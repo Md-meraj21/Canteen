@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Alert, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
 import { productsAPI, categoriesAPI, usersAPI } from "../services/api";
 import { useAuthStore } from "../context/store";
-import "../styles/AdminDashboard.css";
+import { money, page, panel } from "../utils/ui";
 
 const emptyForm = {
   name: "",
@@ -231,200 +232,145 @@ const AdminDashboard = () => {
   const isAdmin = user?.role === "admin";
 
   return (
-    <div className="admin-dashboard">
-      <aside className="admin-sidebar">
-        <div>
-          <p className="admin-eyebrow">ShopKaro</p>
-          <h2>Admin Dashboard</h2>
-        </div>
-        <nav>
-          <a href="#products">Products</a>
-          <a href="#product-form">Add Product</a>
-          <Link to="/admin/orders">Orders</Link>
-          <Link to="/admin/verification">User Verification</Link>
-        </nav>
-      </aside>
-
-      <main className="admin-main">
-        <div className="admin-topbar">
+    <div className={page}>
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className={`${panel} h-max p-5 lg:sticky lg:top-32`}>
           <div>
-            <p className="admin-eyebrow">Inventory Control</p>
-            <h1>Products Dashboard</h1>
+            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">ShopCart</p>
+            <h2 className="mt-1 text-2xl font-black text-slate-950">Admin Dashboard</h2>
           </div>
-          <button type="button" className="secondary-btn" onClick={fetchDashboard} disabled={loading}>
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+          <nav className="mt-6 grid gap-2 text-sm font-semibold">
+            <a className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-50" href="#products">Products</a>
+            <a className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-50" href="#product-form">Add Product</a>
+            <Link className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-50" to="/admin/orders">Orders</Link>
+            <Link className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-50" to="/admin/verification">User Verification</Link>
+          </nav>
+        </aside>
+
+        <main className="min-w-0">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Inventory Control</p>
+              <h1 className="text-3xl font-black text-slate-950">Products Dashboard</h1>
+            </div>
+            <Button variant="outlined" color="success" onClick={fetchDashboard} disabled={loading}>
+              {loading ? "Refreshing..." : "Refresh"}
+            </Button>
+          </div>
 
         {!isAdmin && (
-          <div className="admin-warning">
+          <Alert severity="warning" className="!mt-5">
             Login with the admin account to add, edit, or delete products.
             <strong> Email:</strong> seller@shopkaro.com <strong>Password:</strong> seller123
-          </div>
+          </Alert>
         )}
 
-        <section className="admin-stats">
-          <div className="stat-card">
-            <span>Total Products</span>
-            <strong>{stats.products}</strong>
-          </div>
-          <div className="stat-card">
-            <span>Total Stock</span>
-            <strong>{stats.stock}</strong>
-          </div>
-          <div className="stat-card">
-            <span>Inventory Value</span>
-            <strong>Rs {stats.inventoryValue.toLocaleString("en-IN")}</strong>
-          </div>
-          <div className="stat-card">
-            <span>Pending Users</span>
-            <strong>{stats.pendingUsers}</strong>
-          </div>
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Total Products", stats.products],
+            ["Total Stock", stats.stock],
+            ["Inventory Value", money(stats.inventoryValue)],
+            ["Pending Users", stats.pendingUsers],
+          ].map(([label, value]) => (
+            <div key={label} className={`${panel} p-5`}>
+              <span className="text-sm text-slate-500">{label}</span>
+              <strong className="mt-2 block text-3xl text-slate-950">{value}</strong>
+            </div>
+          ))}
         </section>
 
         {(message || error) && (
-          <div className={error ? "admin-alert error" : "admin-alert success"}>
+          <Alert severity={error ? "error" : "success"} className="!mt-5">
             {error || message}
-          </div>
+          </Alert>
         )}
 
-        <section id="product-form" className="admin-panel">
-          <div className="panel-header">
+        <section id="product-form" className={`${panel} mt-6 p-5`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="admin-eyebrow">Product CRUD</p>
-              <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
+              <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Product CRUD</p>
+              <h2 className="text-2xl font-black text-slate-950">{editingId ? "Edit Product" : "Add New Product"}</h2>
             </div>
             {editingId && (
-              <button type="button" className="secondary-btn" onClick={cancelEdit}>
+              <Button type="button" variant="outlined" onClick={cancelEdit}>
                 Cancel Edit
-              </button>
+              </Button>
             )}
           </div>
 
-          <form className="product-form" onSubmit={handleSubmit}>
-            <label>
-              Product Name
-              <input name="name" value={form.name} onChange={handleChange} placeholder="Coffee Maker" />
-            </label>
+          <form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit}>
+            <TextField label="Product Name" name="name" value={form.name} onChange={handleChange} placeholder="Coffee Maker" />
+            <TextField select label="Category" name="category" value={form.category} onChange={handleChange}>
+              {categoryOptions.map((category) => <MenuItem key={category} value={category}>{category}</MenuItem>)}
+            </TextField>
+            <TextField label="Price" name="price" type="number" inputProps={{ min: 0 }} value={form.price} onChange={handleChange} />
+            <TextField label="Original Price" name="originalPrice" type="number" inputProps={{ min: 0 }} value={form.originalPrice} onChange={handleChange} />
+            <TextField label="Discount %" name="discount" type="number" inputProps={{ min: 0, max: 100 }} value={form.discount} onChange={handleChange} />
+            <TextField label="Stock" name="stock" type="number" inputProps={{ min: 0 }} value={form.stock} onChange={handleChange} />
+            <TextField className="sm:col-span-2" label="Image URL" name="imageUrl" value={form.imageUrl} onChange={handleChange} placeholder="https://example.com/image.jpg" />
+            <TextField className="sm:col-span-2" label="Description" name="description" value={form.description} onChange={handleChange} multiline rows={4} />
+            <TextField label="Brand" name="brand" value={form.brand} onChange={handleChange} />
+            <TextField label="Color" name="color" value={form.color} onChange={handleChange} />
+            <TextField label="Warranty" name="warranty" value={form.warranty} onChange={handleChange} />
+            <TextField label="Material" name="material" value={form.material} onChange={handleChange} />
 
-            <label>
-              Category
-              <select name="category" value={form.category} onChange={handleChange}>
-                {categoryOptions.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Price
-              <input name="price" type="number" min="0" value={form.price} onChange={handleChange} />
-            </label>
-
-            <label>
-              Original Price
-              <input name="originalPrice" type="number" min="0" value={form.originalPrice} onChange={handleChange} />
-            </label>
-
-            <label>
-              Discount %
-              <input name="discount" type="number" min="0" max="100" value={form.discount} onChange={handleChange} />
-            </label>
-
-            <label>
-              Stock
-              <input name="stock" type="number" min="0" value={form.stock} onChange={handleChange} />
-            </label>
-
-            <label className="span-2">
-              Image URL
-              <input name="imageUrl" value={form.imageUrl} onChange={handleChange} placeholder="https://example.com/image.jpg" />
-            </label>
-
-            <label className="span-2">
-              Description
-              <textarea name="description" value={form.description} onChange={handleChange} rows="4" />
-            </label>
-
-            <label>
-              Brand
-              <input name="brand" value={form.brand} onChange={handleChange} />
-            </label>
-
-            <label>
-              Color
-              <input name="color" value={form.color} onChange={handleChange} />
-            </label>
-
-            <label>
-              Warranty
-              <input name="warranty" value={form.warranty} onChange={handleChange} />
-            </label>
-
-            <label>
-              Material
-              <input name="material" value={form.material} onChange={handleChange} />
-            </label>
-
-            <div className="form-actions span-2">
-              <button type="submit" disabled={saving}>
+            <div className="flex gap-3 sm:col-span-2">
+              <Button type="submit" variant="contained" color="success" disabled={saving}>
                 {saving ? "Saving..." : editingId ? "Update Product" : "Add Product"}
-              </button>
-              <button type="button" className="secondary-btn" onClick={cancelEdit}>
+              </Button>
+              <Button type="button" variant="outlined" onClick={cancelEdit}>
                 Clear
-              </button>
+              </Button>
             </div>
           </form>
         </section>
 
-        <section id="products" className="admin-panel">
-          <div className="panel-header">
+        <section id="products" className={`${panel} mt-6 overflow-hidden`}>
+          <div className="flex flex-col gap-2 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="admin-eyebrow">Catalog</p>
-              <h2>Product List</h2>
+              <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Catalog</p>
+              <h2 className="text-2xl font-black text-slate-950">Product List</h2>
             </div>
-            <span>{products.length} products</span>
+            <span className="text-sm font-semibold text-slate-500">{products.length} products</span>
           </div>
 
           {loading ? (
-            <div className="admin-loading">Loading dashboard...</div>
+            <div className="grid min-h-56 place-items-center"><CircularProgress color="success" /></div>
           ) : (
-            <div className="product-table-wrap">
-              <table className="product-table">
-                <thead>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Actions</th>
+                    <th className="px-4 py-3">Product</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Price</th>
+                    <th className="px-4 py-3">Stock</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {products.map((product) => (
                     <tr key={product._id}>
-                      <td>
-                        <div className="table-product">
-                          <img src={product.images?.[0]} alt={product.name} />
+                      <td className="px-4 py-4">
+                        <div className="flex min-w-80 items-center gap-3">
+                          <img src={product.images?.[0]} alt={product.name} className="h-14 w-14 rounded-md bg-slate-100 object-cover" />
                           <div>
-                            <strong>{product.name}</strong>
-                            <span>{product.description}</span>
+                            <strong className="block text-slate-950">{product.name}</strong>
+                            <span className="line-clamp-1 text-slate-500">{product.description}</span>
                           </div>
                         </div>
                       </td>
-                      <td>{product.category}</td>
-                      <td>Rs {Number(product.price || 0).toLocaleString("en-IN")}</td>
-                      <td>{product.stock}</td>
-                      <td>
-                        <div className="row-actions">
-                          <button type="button" className="secondary-btn" onClick={() => handleEdit(product)}>
+                      <td className="px-4 py-4">{product.category}</td>
+                      <td className="px-4 py-4 font-bold">{money(product.price)}</td>
+                      <td className="px-4 py-4">{product.stock}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex gap-2">
+                          <Button type="button" size="small" variant="outlined" onClick={() => handleEdit(product)}>
                             Edit
-                          </button>
-                          <button type="button" className="danger-btn" onClick={() => handleDelete(product._id)}>
+                          </Button>
+                          <Button type="button" size="small" color="error" onClick={() => handleDelete(product._id)}>
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -435,6 +381,7 @@ const AdminDashboard = () => {
           )}
         </section>
       </main>
+      </div>
     </div>
   );
 };

@@ -1,180 +1,143 @@
 import React, { useEffect, useState } from 'react';
+import { Alert, Button, Chip, CircularProgress, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { ordersAPI } from '../services/api';
-import '../styles/AdminOrders.css';
+import { money, page, panel, statusTone } from '../utils/ui';
+
+const filters = ['all', 'pending', 'confirmed', 'shipped', 'delivered'];
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
-
-  useEffect(() => {
-    fetchAllOrders();
-    // Poll for new orders every 5 seconds
-    const interval = setInterval(fetchAllOrders, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const fetchAllOrders = async () => {
     try {
       const response = await ordersAPI.getAll();
-      console.log('Orders fetched:', response.data);
       setOrders(Array.isArray(response.data) ? response.data : []);
-      setLoading(false);
+      setError('');
     } catch (err) {
-      setError('Failed to load orders: ' + err.message);
-      console.error('Error fetching orders:', err);
+      setError(`Failed to load orders: ${err.message}`);
+    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAllOrders();
+    const interval = setInterval(fetchAllOrders, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      console.log('Updating order:', orderId, 'to status:', newStatus);
-      const response = await ordersAPI.updateStatus(orderId, newStatus);
-      console.log('Update response:', response);
-      alert(`Order status updated to ${newStatus}`);
+      await ordersAPI.updateStatus(orderId, newStatus);
       fetchAllOrders();
     } catch (err) {
-      alert('Failed to update order status: ' + err.message);
-      console.error('Error updating status:', err);
+      setError(`Failed to update order status: ${err.message}`);
     }
   };
 
-  const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.orderStatus === filter);
+  const filteredOrders = filter === 'all' ? orders : orders.filter((order) => order.orderStatus === filter);
+  const stats = {
+    total: orders.length,
+    pending: orders.filter((order) => order.orderStatus === 'pending').length,
+    confirmed: orders.filter((order) => order.orderStatus === 'confirmed').length,
+    delivered: orders.filter((order) => order.orderStatus === 'delivered').length,
+  };
 
-  if (loading) return <div className="loading">Loading orders...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading) {
+    return (
+      <div className={`${page} grid min-h-[40vh] place-items-center`}>
+        <CircularProgress color="success" />
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-orders">
-      <h2>📊 Retailer Dashboard - All Orders</h2>
-      
-      <div className="admin-stats">
-        <div className="stat-card">
-          <span className="stat-label">Total Orders</span>
-          <span className="stat-value">{orders.length}</span>
+    <div className={page}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Retailer Dashboard</p>
+          <h1 className="text-3xl font-black text-slate-950">All Orders</h1>
         </div>
-        <div className="stat-card">
-          <span className="stat-label">Pending</span>
-          <span className="stat-value pending">{orders.filter(o => o.orderStatus === 'pending').length}</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-label">Confirmed</span>
-          <span className="stat-value confirmed">{orders.filter(o => o.orderStatus === 'confirmed').length}</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-label">Delivered</span>
-          <span className="stat-value delivered">{orders.filter(o => o.orderStatus === 'delivered').length}</span>
-        </div>
+        <Button variant="outlined" color="success" onClick={fetchAllOrders}>Refresh</Button>
       </div>
 
-      <div className="filter-buttons">
-        <button 
-          className={filter === 'all' ? 'active' : ''} 
-          onClick={() => setFilter('all')}
-        >
-          All Orders
-        </button>
-        <button 
-          className={filter === 'pending' ? 'active' : ''} 
-          onClick={() => setFilter('pending')}
-        >
-          ⏳ Pending
-        </button>
-        <button 
-          className={filter === 'confirmed' ? 'active' : ''} 
-          onClick={() => setFilter('confirmed')}
-        >
-          ✅ Confirmed
-        </button>
-        <button 
-          className={filter === 'shipped' ? 'active' : ''} 
-          onClick={() => setFilter('shipped')}
-        >
-          🚚 Shipped
-        </button>
-        <button 
-          className={filter === 'delivered' ? 'active' : ''} 
-          onClick={() => setFilter('delivered')}
-        >
-          📦 Delivered
-        </button>
+      {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
+
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ['Total Orders', stats.total],
+          ['Pending', stats.pending],
+          ['Confirmed', stats.confirmed],
+          ['Delivered', stats.delivered],
+        ].map(([label, value]) => (
+          <div key={label} className={`${panel} p-5`}>
+            <p className="text-sm text-slate-500">{label}</p>
+            <strong className="mt-2 block text-3xl text-slate-950">{value}</strong>
+          </div>
+        ))}
+      </section>
+
+      <div className="mt-6 overflow-x-auto">
+        <ToggleButtonGroup color="success" value={filter} exclusive onChange={(_, value) => value && setFilter(value)}>
+          {filters.map((item) => (
+            <ToggleButton key={item} value={item}>{item}</ToggleButton>
+          ))}
+        </ToggleButtonGroup>
       </div>
 
-      <div className="orders-table-container">
-        <table className="orders-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Products</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map(order => (
-                <tr key={order._id} className={`order-row ${order.orderStatus}`}>
-                  <td className="order-id">{order.orderNumber}</td>
-                  <td>{order.user?.name || 'Guest'}</td>
-                  <td>
-                    <div className="products-list">
-                      {order.items && order.items.map((item, idx) => (
-                        <span key={idx} className="product-item">
-                          {item.product?.name || 'Product'} x{item.quantity}
-                        </span>
+      <section className={`${panel} mt-6 overflow-hidden`}>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-4 py-3">Order</th>
+                <th className="px-4 py-3">Customer</th>
+                <th className="px-4 py-3">Products</th>
+                <th className="px-4 py-3">Amount</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {filteredOrders.length > 0 ? filteredOrders.map((order) => (
+                <tr key={order._id}>
+                  <td className="px-4 py-4 font-bold">{order.orderNumber}</td>
+                  <td className="px-4 py-4">{order.user?.name || 'Guest'}</td>
+                  <td className="px-4 py-4">
+                    <div className="grid gap-1">
+                      {order.items?.map((item, index) => (
+                        <span key={index}>{item.product?.name || 'Product'} x{item.quantity}</span>
                       ))}
                     </div>
                   </td>
-                  <td className="amount">₹{order.totalAmount?.toFixed(2) || '0'}</td>
-                  <td>
-                    <span className={`status-badge ${order.orderStatus}`}>
-                      {order.orderStatus?.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div className="action-buttons">
-                      {order.orderStatus === 'pending' && (
-                        <button 
-                          className="btn-confirm"
-                          onClick={() => handleStatusUpdate(order._id, 'confirmed')}
-                        >
-                          ✅ Confirm
-                        </button>
-                      )}
-                      {order.orderStatus === 'confirmed' && (
-                        <button 
-                          className="btn-ship"
-                          onClick={() => handleStatusUpdate(order._id, 'shipped')}
-                        >
-                          🚚 Ship
-                        </button>
-                      )}
-                      {order.orderStatus === 'shipped' && (
-                        <button 
-                          className="btn-deliver"
-                          onClick={() => handleStatusUpdate(order._id, 'delivered')}
-                        >
-                          📦 Deliver
-                        </button>
-                      )}
-                    </div>
+                  <td className="px-4 py-4 font-bold">{money(order.totalAmount)}</td>
+                  <td className="px-4 py-4"><Chip label={order.orderStatus} color={statusTone(order.orderStatus)} size="small" /></td>
+                  <td className="px-4 py-4">{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-4">
+                    {order.orderStatus === 'pending' && (
+                      <Button size="small" color="success" onClick={() => handleStatusUpdate(order._id, 'confirmed')}>Confirm</Button>
+                    )}
+                    {order.orderStatus === 'confirmed' && (
+                      <Button size="small" color="success" onClick={() => handleStatusUpdate(order._id, 'shipped')}>Ship</Button>
+                    )}
+                    {order.orderStatus === 'shipped' && (
+                      <Button size="small" color="success" onClick={() => handleStatusUpdate(order._id, 'delivered')}>Deliver</Button>
+                    )}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="no-data">No orders found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )) : (
+                <tr>
+                  <td colSpan="7" className="px-4 py-10 text-center text-slate-500">No orders found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

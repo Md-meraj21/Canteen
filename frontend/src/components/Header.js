@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaHeart, FaMapMarkerAlt, FaSearch, FaShoppingCart, FaStore, FaTimes, FaUser } from 'react-icons/fa';
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Menu,
+  MenuItem,
+  TextField,
+  Tooltip,
+} from '@mui/material';
+import { FaHeart, FaMapMarkerAlt, FaSearch, FaShoppingCart, FaTimes, FaUser } from 'react-icons/fa';
 import { locationAPI } from '../services/api';
 import { useAuthStore, useCartStore, useWishlistStore } from '../context/store';
-import '../styles/Header.css';
+import logo from '../asests/logo.png';
+
+const categories = ['Phones', 'Laptops', 'Electronics', 'Groceries', 'Home & Kitchen', 'Fashion', 'Books', 'Sports', 'Beauty'];
 
 function Header() {
   const navigate = useNavigate();
@@ -15,6 +29,8 @@ function Header() {
   const [locationResults, setLocationResults] = useState([]);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [locationMessage, setLocationMessage] = useState('');
+  const [accountAnchor, setAccountAnchor] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(() => {
     try {
       return localStorage.getItem('selectedLocation') || '';
@@ -22,11 +38,8 @@ function Header() {
       return '';
     }
   });
-  const [locationMessage, setLocationMessage] = useState('');
 
-  const formatLocation = (location) => [location.name, location.state, location.country]
-    .filter(Boolean)
-    .join(', ');
+  const formatLocation = (location) => [location.name, location.state, location.country].filter(Boolean).join(', ');
 
   const saveLocation = (location) => {
     const label = formatLocation(location);
@@ -50,19 +63,20 @@ function Header() {
 
   const handleLogout = () => {
     logout();
+    setAccountAnchor(null);
     navigate('/');
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = (event) => {
+    event.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
       setSearchTerm('');
     }
   };
 
-  const handleLocationSearch = async (e) => {
-    e.preventDefault();
+  const handleLocationSearch = async (event) => {
+    event.preventDefault();
     const query = locationQuery.trim();
     if (!query) return;
 
@@ -70,14 +84,8 @@ function Header() {
     try {
       const response = await locationAPI.search(query);
       const results = Array.isArray(response.data) ? response.data : [];
-      if (results.length === 0) {
-        setLocationMessage('Location not found');
-        setLocationResults([]);
-        return;
-      }
-
       setLocationResults(results);
-      setLocationMessage('');
+      setLocationMessage(results.length ? '' : 'Location not found');
     } catch (error) {
       setLocationMessage(
         error.message === 'OPENWEATHER_KEY_MISSING'
@@ -104,11 +112,8 @@ function Header() {
           const { latitude, longitude } = position.coords;
           const response = await locationAPI.reverse(latitude, longitude);
           const firstLocation = Array.isArray(response.data) ? response.data[0] : null;
-          if (!firstLocation) {
-            setLocationMessage('Unable to read live location');
-            return;
-          }
-          saveLocation(firstLocation);
+          if (firstLocation) saveLocation(firstLocation);
+          else setLocationMessage('Unable to read live location');
         } catch (error) {
           setLocationMessage(
             error.message === 'OPENWEATHER_KEY_MISSING'
@@ -128,150 +133,149 @@ function Header() {
     );
   };
 
-  const openLocationModal = (e) => {
-    e.preventDefault();
-    setIsLocationOpen(true);
-    setLocationMessage('');
-  };
-
-  const closeLocationModal = () => {
-    setIsLocationOpen(false);
-    setLocationMessage('');
-  };
-
   return (
-    <header className="header">
-      <div className="header-content">
-        <div className="logo">
-          <Link to="/">
-            <span className="logo-icon"><FaStore /></span>
-            <div className="logo-info">
-              <span className="logo-text">ShopKaro</span>
-              <span className="logo-tagline">Premium Shopping</span>
-            </div>
-          </Link>
-        </div>
+    <header className="sticky top-0 z-50 border-b border-emerald-900/20 bg-emerald-950 text-white shadow-lg">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-3 py-3 sm:gap-3 sm:px-6 lg:flex-nowrap lg:px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-2 text-white no-underline sm:min-w-max sm:gap-3">
+          <span className="rounded-lg bg-white p-1 shadow-sm">
+            <img src={logo} alt="ShopCart Logo" className="h-9 w-9 rounded-md object-contain sm:h-10 sm:w-10" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-lg font-black leading-none text-amber-300 sm:text-xl">ShopCart</span>
+            <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-emerald-100 sm:text-[11px]">Premium Shopping</span>
+          </span>
+        </Link>
 
-        <form className="search-box" onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} className="order-3 flex w-full overflow-hidden rounded-lg bg-white shadow-sm lg:order-none lg:ml-4 lg:max-w-xl">
           <input
             type="text"
-            placeholder="Search for products, brands, and more..."
+            placeholder="Search products..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="min-w-0 flex-1 px-3 py-2.5 text-sm text-slate-950 outline-none sm:px-4 sm:py-3"
           />
-          <button type="submit" className="search-btn" aria-label="Search products">
+          <button type="submit" className="grid w-12 place-items-center bg-emerald-700 text-white" aria-label="Search products">
             <FaSearch />
           </button>
         </form>
 
-        <a href="#location" className="location-box" onClick={openLocationModal}>
-          <span className="location-pin"><FaMapMarkerAlt /></span>
-          <span className="location-link-text">
-            {selectedLocation || 'Add location'}
-          </span>
-        </a>
+        <button
+          type="button"
+          onClick={() => setIsLocationOpen(true)}
+          className="order-4 flex w-full items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-left text-sm font-semibold transition hover:bg-white/15 sm:w-auto sm:flex-1 lg:order-none lg:w-56 lg:flex-none"
+        >
+          <FaMapMarkerAlt className="shrink-0" />
+          <span className="truncate">{selectedLocation || 'Add location'}</span>
+        </button>
 
-        <div className="header-actions">
-          <Link to="/wishlist" className="icon-btn" title="Wishlist">
-            <span className="icon"><FaHeart /></span>
-            <span className="count">{wishlistItems.length}</span>
-          </Link>
-          <Link to="/cart" className="icon-btn" title="Cart">
-            <span className="icon"><FaShoppingCart /></span>
-            <span className="count">{items.length}</span>
-          </Link>
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          <Tooltip title="Wishlist">
+            <IconButton component={Link} to="/wishlist" aria-label="Wishlist" className="!text-white">
+              <Badge badgeContent={wishlistItems.length} color="error">
+                <FaHeart />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Cart">
+            <IconButton component={Link} to="/cart" aria-label="Cart" className="!text-white">
+              <Badge badgeContent={items.length} color="error">
+                <FaShoppingCart />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
           {user ? (
-            <div className="user-menu">
-              <button className="icon-btn user-btn" title="Account">
-                <span className="icon"><FaUser /></span>
-              </button>
-              <div className="dropdown-menu">
-                <div className="user-info">{user.name}</div>
-                <Link to="/profile" className="dropdown-item">Profile</Link>
-                <Link to="/orders" className="dropdown-item">Orders</Link>
+            <>
+              <Tooltip title="Account">
+                <IconButton className="!text-white" aria-label="Account" onClick={(event) => setAccountAnchor(event.currentTarget)}>
+                  <FaUser />
+                </IconButton>
+              </Tooltip>
+              <Menu anchorEl={accountAnchor} open={Boolean(accountAnchor)} onClose={() => setAccountAnchor(null)}>
+                <MenuItem disabled>{user.name}</MenuItem>
+                <MenuItem component={Link} to="/profile" onClick={() => setAccountAnchor(null)}>Profile</MenuItem>
+                <MenuItem component={Link} to="/orders" onClick={() => setAccountAnchor(null)}>Orders</MenuItem>
                 {user.role === 'admin' && (
-                  <>
-                    <Link to="/admin" className="dropdown-item admin">Dashboard</Link>
-                    <Link to="/admin/orders" className="dropdown-item admin">Admin Orders</Link>
-                    <Link to="/admin/verification" className="dropdown-item admin">Verify Users</Link>
-                  </>
+                  <MenuItem component={Link} to="/admin" onClick={() => setAccountAnchor(null)}>Dashboard</MenuItem>
                 )}
-                <button onClick={handleLogout} className="dropdown-item logout">Logout</button>
-              </div>
-            </div>
+                {user.role === 'admin' && (
+                  <MenuItem component={Link} to="/admin/orders" onClick={() => setAccountAnchor(null)}>Admin Orders</MenuItem>
+                )}
+                {user.role === 'admin' && (
+                  <MenuItem component={Link} to="/admin/verification" onClick={() => setAccountAnchor(null)}>Verify Users</MenuItem>
+                )}
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
           ) : (
-            <div className="auth-buttons">
-              <Link to="/login" className="auth-link">Login</Link>
-              <Link to="/register" className="auth-link">Register</Link>
-            </div>
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              variant="outlined"
+              startIcon={<FaUser />}
+              className="!ml-1 !min-w-0 !rounded-full !border-white/50 !px-3 !py-1.5 !text-xs !font-bold !text-white sm:!px-4 sm:!text-sm"
+            >
+              Login
+            </Button>
           )}
         </div>
       </div>
 
-      <nav className="category-nav">
-        <Link to="/?category=Phones" className="nav-item">Phones</Link>
-        <Link to="/?category=Laptops" className="nav-item">Laptops</Link>
-        <Link to="/?category=Electronics" className="nav-item">Electronics</Link>
-        <Link to="/?category=Groceries" className="nav-item">Groceries</Link>
-        <Link to="/?category=Home & Kitchen" className="nav-item">Home & Kitchen</Link>
-        <Link to="/?category=Clothing" className="nav-item">Fashion</Link>
-        <Link to="/?category=Books" className="nav-item">Books</Link>
-        <Link to="/?category=Sports" className="nav-item">Sports</Link>
-        <Link to="/?category=Beauty" className="nav-item">Beauty</Link>
+      <nav className="border-t border-white/10 bg-emerald-900/70">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 sm:px-6 lg:px-8">
+          {categories.map((category) => (
+            <Link
+              key={category}
+              to={`/?category=${encodeURIComponent(category === 'Fashion' ? 'Clothing' : category)}`}
+              className="shrink-0 px-3 py-3 text-sm font-bold text-emerald-100 no-underline transition hover:text-amber-300"
+            >
+              {category}
+            </Link>
+          ))}
+        </div>
       </nav>
 
-      {isLocationOpen && (
-        <div className="location-modal-backdrop" role="presentation" onClick={closeLocationModal}>
-          <div className="location-modal" role="dialog" aria-modal="true" aria-labelledby="location-title" onClick={(e) => e.stopPropagation()}>
-            <div className="location-modal-header">
-              <div>
-                <h2 id="location-title">Choose location</h2>
-                {selectedLocation && <p>Current: {selectedLocation}</p>}
-              </div>
-              <button type="button" className="location-close-btn" onClick={closeLocationModal} aria-label="Close location popup">
-                <FaTimes />
+      <Dialog open={isLocationOpen} onClose={() => setIsLocationOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle className="flex items-center justify-between">
+          Choose location
+          <IconButton onClick={() => setIsLocationOpen(false)} aria-label="Close location popup">
+            <FaTimes />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {selectedLocation && <p className="mb-4 text-sm text-slate-500">Current: {selectedLocation}</p>}
+          <form onSubmit={handleLocationSearch} className="flex gap-2">
+            <TextField
+              label="Search city, state, or country"
+              value={locationQuery}
+              onChange={(event) => setLocationQuery(event.target.value)}
+              fullWidth
+              autoFocus
+            />
+            <Button type="submit" variant="contained" color="success">Search</Button>
+          </form>
+          <Button fullWidth variant="outlined" color="success" className="!mt-3" onClick={handleUseLiveLocation} disabled={isLocating}>
+            {isLocating ? 'Detecting...' : 'Use live location'}
+          </Button>
+          {locationMessage && <p className="mt-3 text-sm text-slate-600">{locationMessage}</p>}
+          <div className="mt-4 grid gap-2">
+            {locationResults.map((location) => (
+              <button
+                type="button"
+                key={`${location.name}-${location.state || ''}-${location.country}-${location.lat}-${location.lon}`}
+                className="rounded-md border border-slate-200 bg-slate-50 p-3 text-left text-sm transition hover:border-emerald-600"
+                onClick={() => saveLocation(location)}
+              >
+                <strong>{formatLocation(location)}</strong>
+                {location.lat && location.lon && (
+                  <span className="block text-xs text-slate-500">{Number(location.lat).toFixed(3)}, {Number(location.lon).toFixed(3)}</span>
+                )}
               </button>
-            </div>
-
-            <form className="location-search-form" onSubmit={handleLocationSearch}>
-              <input
-                type="text"
-                placeholder="Search city, state, or country"
-                value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-                className="location-modal-input"
-                autoFocus
-              />
-              <button type="submit" className="location-primary-btn">Search</button>
-            </form>
-
-            <button type="button" className="location-live-btn" onClick={handleUseLiveLocation} disabled={isLocating}>
-              {isLocating ? 'Detecting...' : 'Use live location'}
-            </button>
-
-            {locationMessage && <p className="location-modal-message">{locationMessage}</p>}
-
-            {locationResults.length > 0 && (
-              <div className="location-results">
-                {locationResults.map((location) => (
-                  <button
-                    type="button"
-                    key={`${location.name}-${location.state || ''}-${location.country}-${location.lat}-${location.lon}`}
-                    className="location-result-item"
-                    onClick={() => saveLocation(location)}
-                  >
-                    <span>{formatLocation(location)}</span>
-                    {location.lat && location.lon && (
-                      <small>{Number(location.lat).toFixed(3)}, {Number(location.lon).toFixed(3)}</small>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

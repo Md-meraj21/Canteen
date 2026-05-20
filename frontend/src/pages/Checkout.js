@@ -1,29 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCartStore } from '../context/store';
-import { useAuthStore } from '../context/store';
+import { Alert, Button, Divider, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { useAuthStore, useCartStore } from '../context/store';
 import { ordersAPI } from '../services/api';
-import '../styles/Checkout.css';
+import { money, page, panel } from '../utils/ui';
+
+function getSavedLocation() {
+  try {
+    const savedDetails = localStorage.getItem('selectedLocationDetails');
+    if (savedDetails) return JSON.parse(savedDetails);
+
+    const savedLabel = localStorage.getItem('selectedLocation');
+    if (!savedLabel) return null;
+    const [city = '', state = '', country = ''] = savedLabel.split(',').map((item) => item.trim());
+    return { label: savedLabel, city, state, country };
+  } catch {
+    return null;
+  }
+}
 
 function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { items, totalPrice, clearCart } = useCartStore();
-  const getSavedLocation = () => {
-    try {
-      const savedDetails = localStorage.getItem('selectedLocationDetails');
-      if (savedDetails) {
-        return JSON.parse(savedDetails);
-      }
-
-      const savedLabel = localStorage.getItem('selectedLocation');
-      if (!savedLabel) return null;
-      const [city = '', state = '', country = ''] = savedLabel.split(',').map((item) => item.trim());
-      return { label: savedLabel, city, state, country };
-    } catch {
-      return null;
-    }
-  };
   const [savedLocation] = useState(getSavedLocation);
   const [formData, setFormData] = useState(() => ({
     street: '',
@@ -35,54 +34,47 @@ function Checkout() {
     paymentMethod: 'credit-card',
   }));
   const [loading, setLoading] = useState(false);
+  const tax = totalPrice * 0.18;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
   const applySavedLocation = () => {
     if (!savedLocation) return;
-    setFormData((prev) => ({
-      ...prev,
-      city: savedLocation.city || prev.city,
-      state: savedLocation.state || prev.state,
-      country: savedLocation.country || prev.country,
+    setFormData((previous) => ({
+      ...previous,
+      city: savedLocation.city || previous.city,
+      state: savedLocation.state || previous.state,
+      country: savedLocation.country || previous.country,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (items.length === 0) {
-      alert('Cart is empty');
-      return;
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (items.length === 0) return;
 
     try {
       setLoading(true);
-      const subtotal = totalPrice;
-      const tax = subtotal * 0.18;
-      const shippingCost = 0;
-
       const orderData = {
-        items: items.map(item => ({
+        items: items.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
-          price: item.product.price
+          price: item.product.price,
         })),
         shippingAddress: formData,
         paymentMethod: formData.paymentMethod,
-        subtotal,
-        shippingCost,
+        subtotal: totalPrice,
+        shippingCost: 0,
         tax,
-        totalAmount: subtotal + shippingCost + tax
+        totalAmount: totalPrice + tax,
       };
 
       const response = await ordersAPI.create(orderData);
       clearCart();
       navigate('/order-confirmation', { state: { order: response.data.order } });
     } catch (error) {
-      console.error('Checkout failed:', error);
       alert('Failed to place order. Please try again.');
     } finally {
       setLoading(false);
@@ -91,161 +83,93 @@ function Checkout() {
 
   if (!user) {
     return (
-      <div className="checkout-empty">
-        <h2>❌ Login Required</h2>
-        <p>You need to log in before you can purchase items.</p>
-        <button onClick={() => navigate('/login')}>Go to Login</button>
+      <div className={`${page} grid min-h-[45vh] place-items-center`}>
+        <div className={`${panel} p-8 text-center`}>
+          <h1 className="text-2xl font-bold text-slate-950">Login Required</h1>
+          <p className="mt-2 text-slate-500">You need to log in before purchasing items.</p>
+          <Button variant="contained" color="success" className="!mt-5" onClick={() => navigate('/login')}>
+            Go to Login
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="checkout-empty">
-        <h2>No items in cart</h2>
-        <button onClick={() => navigate('/')}>Return to Shopping</button>
+      <div className={`${page} grid min-h-[45vh] place-items-center`}>
+        <div className={`${panel} p-8 text-center`}>
+          <h1 className="text-2xl font-bold text-slate-950">No items in cart</h1>
+          <Button variant="contained" color="success" className="!mt-5" onClick={() => navigate('/')}>
+            Return to Shopping
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="checkout-container">
-      <h1>Checkout</h1>
+    <div className={page}>
+      <h1 className="text-3xl font-black text-slate-950">Checkout</h1>
 
-      <div className="checkout-content">
-        <form className="checkout-form" onSubmit={handleSubmit}>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <form onSubmit={handleSubmit} className={`${panel} grid gap-6 p-5`}>
           <section>
-            <h2>Shipping Address</h2>
+            <h2 className="text-xl font-bold text-slate-950">Shipping Address</h2>
             {savedLocation ? (
-              <div className="saved-location-note">
-                <span>Using saved location: {savedLocation.label}</span>
-                <button type="button" onClick={applySavedLocation}>Apply</button>
-              </div>
+              <Alert
+                severity="info"
+                className="!mt-4"
+                action={<Button color="inherit" size="small" onClick={applySavedLocation}>Apply</Button>}
+              >
+                Saved location: {savedLocation.label}
+              </Alert>
             ) : (
-              <div className="saved-location-note muted">
-                No saved location found. You can enter the address manually.
-              </div>
+              <Alert severity="info" className="!mt-4">No saved location found. Enter address manually.</Alert>
             )}
-            <input
-              type="text"
-              name="street"
-              placeholder="Street Address"
-              value={formData.street}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              value={formData.city}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="state"
-              placeholder="State"
-              value={formData.state}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="zipCode"
-              placeholder="ZIP Code"
-              value={formData.zipCode}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="text"
-              name="country"
-              placeholder="Country"
-              value={formData.country}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-            />
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <TextField label="Street Address" name="street" value={formData.street} onChange={handleChange} required fullWidth className="sm:col-span-2" />
+              <TextField label="City" name="city" value={formData.city} onChange={handleChange} required fullWidth />
+              <TextField label="State" name="state" value={formData.state} onChange={handleChange} required fullWidth />
+              <TextField label="ZIP Code" name="zipCode" value={formData.zipCode} onChange={handleChange} required fullWidth />
+              <TextField label="Country" name="country" value={formData.country} onChange={handleChange} required fullWidth />
+              <TextField label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} required fullWidth className="sm:col-span-2" />
+            </div>
           </section>
 
           <section>
-            <h2>Payment Method</h2>
-            <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="credit-card"
-                checked={formData.paymentMethod === 'credit-card'}
-                onChange={handleChange}
-              />
-              Credit Card
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="debit-card"
-                checked={formData.paymentMethod === 'debit-card'}
-                onChange={handleChange}
-              />
-              Debit Card
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="upi"
-                checked={formData.paymentMethod === 'upi'}
-                onChange={handleChange}
-              />
-              UPI
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="cod"
-                checked={formData.paymentMethod === 'cod'}
-                onChange={handleChange}
-              />
-              Cash on Delivery
-            </label>
+            <h2 className="text-xl font-bold text-slate-950">Payment Method</h2>
+            <RadioGroup name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className="!mt-3">
+              <FormControlLabel value="credit-card" control={<Radio color="success" />} label="Credit Card" />
+              <FormControlLabel value="debit-card" control={<Radio color="success" />} label="Debit Card" />
+              <FormControlLabel value="upi" control={<Radio color="success" />} label="UPI" />
+              <FormControlLabel value="cod" control={<Radio color="success" />} label="Cash on Delivery" />
+            </RadioGroup>
           </section>
 
-          <button type="submit" className="btn-place-order" disabled={loading}>
+          <Button type="submit" variant="contained" color="success" size="large" disabled={loading}>
             {loading ? 'Processing...' : 'Place Order'}
-          </button>
+          </Button>
         </form>
 
-        <div className="order-summary">
-          <h2>Order Summary</h2>
-          {items.map(item => (
-            <div key={item.product._id} className="summary-item">
-              <span>{item.product.name} x {item.quantity}</span>
-              <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
-            </div>
-          ))}
-          <div className="summary-row">
-            <span>Subtotal:</span>
-            <span>₹{totalPrice.toFixed(2)}</span>
+        <aside className={`${panel} h-max p-5`}>
+          <h2 className="text-xl font-bold text-slate-950">Order Summary</h2>
+          <div className="mt-5 grid gap-3">
+            {items.map((item) => (
+              <div key={item.product._id} className="flex justify-between gap-4 text-sm">
+                <span>{item.product.name} x {item.quantity}</span>
+                <strong>{money(item.product.price * item.quantity)}</strong>
+              </div>
+            ))}
           </div>
-          <div className="summary-row">
-            <span>Tax (18%):</span>
-            <span>₹{(totalPrice * 0.18).toFixed(2)}</span>
+          <Divider className="!my-4" />
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between"><span>Subtotal</span><strong>{money(totalPrice)}</strong></div>
+            <div className="flex justify-between"><span>Tax (18%)</span><strong>{money(tax)}</strong></div>
           </div>
-          <div className="summary-total">
-            <span>Total:</span>
-            <span>₹{(totalPrice * 1.18).toFixed(2)}</span>
-          </div>
-        </div>
+          <Divider className="!my-4" />
+          <div className="flex justify-between text-lg font-black"><span>Total</span><span>{money(totalPrice + tax)}</span></div>
+        </aside>
       </div>
     </div>
   );

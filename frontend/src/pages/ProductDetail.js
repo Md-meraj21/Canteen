@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { productsAPI, cartAPI, reviewsAPI, questionsAPI } from '../services/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Alert, Button, Chip, CircularProgress, Divider, IconButton, MenuItem, Rating, TextField } from '@mui/material';
+import { FaHeart, FaMinus, FaPlus, FaRegHeart, FaShoppingCart } from 'react-icons/fa';
+import { cartAPI, productsAPI, questionsAPI, reviewsAPI } from '../services/api';
 import { useAuthStore, useCartStore, useWishlistStore } from '../context/store';
-import '../styles/ProductDetail.css';
-import Button from '@mui/material/Button';
+import { money, page, panel } from '../utils/ui';
 
-const emptyReview = {
-  rating: 5,
-  title: '',
-  comment: '',
-};
+const emptyReview = { rating: 5, title: '', comment: '' };
 
 function ProductDetail() {
   const { id } = useParams();
@@ -28,21 +25,20 @@ function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
 
   const canAnswerQuestions = user?.role === 'admin' || user?.role === 'seller';
 
   const averageRating = useMemo(() => {
     if (!reviews.length) return Number(product?.rating || 0);
-    const total = reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0);
-    return total / reviews.length;
+    return reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
   }, [product, reviews]);
 
   const fetchProductData = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setError('');
       const [productRes, reviewsRes, questionsRes] = await Promise.all([
         productsAPI.getById(id),
         reviewsAPI.getByProduct(id),
@@ -51,7 +47,7 @@ function ProductDetail() {
       setProduct(productRes.data || null);
       setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
       setQuestions(Array.isArray(questionsRes.data) ? questionsRes.data : []);
-    } catch (error) {
+    } catch {
       setError('Failed to load product. Please try again.');
     } finally {
       setLoading(false);
@@ -59,9 +55,7 @@ function ProductDetail() {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchProductData();
-    }
+    if (id) fetchProductData();
   }, [id]);
 
   const handleAddToCart = async () => {
@@ -74,17 +68,14 @@ function ProductDetail() {
       await cartAPI.add(product._id, quantity);
       addItem(product, quantity);
       setFeedback('Product added to cart.');
-    } catch (error) {
+    } catch {
       setFeedback('Failed to add to cart.');
     }
   };
 
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    if (!user) return navigate('/login');
 
     setSubmittingReview(true);
     setFeedback('');
@@ -98,10 +89,8 @@ function ProductDetail() {
       setReviews((current) => [response.data.review, ...current]);
       setReviewForm(emptyReview);
       setFeedback('Review submitted successfully.');
-      const productRes = await productsAPI.getById(id);
-      setProduct(productRes.data);
-    } catch (error) {
-      setFeedback(error.response?.data?.error || 'Review submit nahi ho pa raha.');
+    } catch (err) {
+      setFeedback(err.response?.data?.error || 'Review could not be submitted.');
     } finally {
       setSubmittingReview(false);
     }
@@ -109,11 +98,7 @@ function ProductDetail() {
 
   const handleQuestionSubmit = async (event) => {
     event.preventDefault();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
+    if (!user) return navigate('/login');
     const question = questionText.trim();
     if (!question) return;
 
@@ -124,8 +109,8 @@ function ProductDetail() {
       setQuestions((current) => [response.data.question, ...current]);
       setQuestionText('');
       setFeedback('Question submitted successfully.');
-    } catch (error) {
-      setFeedback(error.response?.data?.error || 'Question submit nahi ho pa raha.');
+    } catch (err) {
+      setFeedback(err.response?.data?.error || 'Question could not be submitted.');
     } finally {
       setSubmittingQuestion(false);
     }
@@ -134,245 +119,154 @@ function ProductDetail() {
   const handleAnswerSubmit = async (questionId) => {
     const answer = answerDrafts[questionId]?.trim();
     if (!answer) return;
-
     try {
       const response = await questionsAPI.answer(questionId, answer);
-      setQuestions((current) =>
-        current.map((question) => (question._id === questionId ? response.data.question : question))
-      );
+      setQuestions((current) => current.map((question) => (question._id === questionId ? response.data.question : question)));
       setAnswerDrafts((current) => ({ ...current, [questionId]: '' }));
       setFeedback('Answer saved successfully.');
-    } catch (error) {
-      setFeedback(error.response?.data?.error || 'Answer save nahi ho pa raha.');
+    } catch (err) {
+      setFeedback(err.response?.data?.error || 'Answer could not be saved.');
     }
   };
 
-  if (loading) return <div className="loading">Loading product details...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
-  if (!product) return <div className="error">Product not found</div>;
+  if (loading) {
+    return (
+      <div className={`${page} grid min-h-[45vh] place-items-center`}>
+        <CircularProgress color="success" />
+      </div>
+    );
+  }
+  if (error) return <div className={page}><Alert severity="error">{error}</Alert></div>;
+  if (!product) return <div className={page}><Alert severity="error">Product not found</Alert></div>;
 
-  const images = Array.isArray(product.images) && product.images.length > 0
+  const images = Array.isArray(product.images) && product.images.length
     ? product.images
     : [`https://via.placeholder.com/700x700?text=${encodeURIComponent(product.name || 'Product')}`];
 
   return (
-    <div className="product-detail-page">
-      <div className="product-detail">
-        <div className="product-images">
-          <img src={images[0]} alt={product.name} className="main-image" />
-          <div className="thumbnail-images">
-            {images.map((img, idx) => (
-              <img key={img} src={img} alt={`View ${idx + 1}`} />
+    <div className={page}>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
+        <div className={`${panel} overflow-hidden`}>
+          <img src={images[0]} alt={product.name} className="aspect-square w-full bg-slate-100 object-cover" />
+          <div className="flex gap-2 overflow-x-auto p-3">
+            {images.map((image, index) => (
+              <img key={`${image}-${index}`} src={image} alt={`View ${index + 1}`} className="h-20 w-20 rounded-md border border-slate-200 object-cover" />
             ))}
           </div>
         </div>
 
-        <div className="product-details">
-          <div className="product-header">
-            <h1>{product.name}</h1>
-            <p className="category">Category: {product.category}</p>
+        <div className={`${panel} p-5`}>
+          <Chip label={product.category || 'Product'} color="success" variant="outlined" />
+          <h1 className="mt-4 text-3xl font-black text-slate-950">{product.name}</h1>
+          <div className="mt-3 flex items-center gap-2">
+            <Rating value={averageRating} precision={0.5} readOnly />
+            <span className="text-sm text-slate-500">{averageRating.toFixed(1)} ({reviews.length || product.numberOfReviews || 0} reviews)</span>
           </div>
 
-          <div className="rating-section">
-            <div className="rating">
-              <span className="stars">{'★'.repeat(Math.round(averageRating))}</span>
-              <span className="review-count">
-                {averageRating.toFixed(1)} ({reviews.length || product.numberOfReviews || 0} reviews)
-              </span>
-            </div>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <span className="text-3xl font-black text-slate-950">{money(product.price)}</span>
+            {product.originalPrice && <span className="text-lg text-slate-400 line-through">{money(product.originalPrice)}</span>}
+            {product.discount > 0 && <Chip label={`${product.discount}% OFF`} color="success" />}
           </div>
 
-          <div className="pricing-section">
-            <div className="pricing">
-              <span className="current-price">Rs {product.price}</span>
-              {product.originalPrice && (
-                <span className="original-price">Rs {product.originalPrice}</span>
-              )}
-              {product.discount > 0 && (
-                <span className="discount-badge">{product.discount}% OFF</span>
-              )}
-            </div>
-          </div>
+          <p className={product.stock > 0 ? 'mt-3 font-bold text-emerald-700' : 'mt-3 font-bold text-red-600'}>
+            {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+          </p>
 
-          <div className="stock-info">
-            {product.stock > 0 ? (
-              <span className="in-stock">In Stock ({product.stock} available)</span>
-            ) : (
-              <span className="out-of-stock">Out of Stock</span>
-            )}
-          </div>
+          <Divider className="!my-5" />
 
-          <hr className="divider" />
+          <h2 className="text-lg font-bold text-slate-950">About this item</h2>
+          <p className="mt-2 text-slate-600">{product.description}</p>
 
-          <div className="description">
-            <h3>About this item</h3>
-            <p>{product.description}</p>
-          </div>
-
-          <div className="specifications">
-            <h3>Specifications</h3>
+          <div className="mt-5 grid gap-2 rounded-lg bg-slate-50 p-4 text-sm">
+            <h3 className="font-bold text-slate-950">Specifications</h3>
             {product.specifications && Object.keys(product.specifications).length > 0 ? (
-              <ul className="specs-list">
-                {product.specifications.brand && <li><strong>Brand:</strong> {product.specifications.brand}</li>}
-                {product.specifications.color && <li><strong>Color:</strong> {product.specifications.color}</li>}
-                {product.specifications.size && <li><strong>Size:</strong> {product.specifications.size}</li>}
-                {product.specifications.weight && <li><strong>Weight:</strong> {product.specifications.weight}</li>}
-                {product.specifications.warranty && <li><strong>Warranty:</strong> {product.specifications.warranty}</li>}
-                {product.specifications.material && <li><strong>Material:</strong> {product.specifications.material}</li>}
-              </ul>
+              Object.entries(product.specifications)
+                .filter(([, value]) => value)
+                .map(([key, value]) => (
+                  <div key={key} className="flex justify-between gap-4">
+                    <span className="capitalize text-slate-500">{key}</span>
+                    <strong>{value}</strong>
+                  </div>
+                ))
             ) : (
-              <p className="no-specs">No specifications available</p>
+              <p className="text-slate-500">No specifications available.</p>
             )}
           </div>
 
-          <hr className="divider" />
-
-          <div className="cart-section">
-            <div className="quantity-selector">
-              <label>Quantity:</label>
-              <div className="quantity-controls">
-                <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="qty-btn">-</button>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  min="1"
-                  max={product.stock}
-                />
-                <button type="button" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="qty-btn">+</button>
-              </div>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="flex items-center rounded-md border border-slate-200">
+              <IconButton onClick={() => setQuantity(Math.max(1, quantity - 1))}><FaMinus className="text-xs" /></IconButton>
+              <span className="min-w-10 text-center font-bold">{quantity}</span>
+              <IconButton onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}><FaPlus className="text-xs" /></IconButton>
             </div>
-
-            <div className="purchase-actions">
-              <Button
-                variant="contained"
-                color="success"
-                className="add-to-cart"
-                onClick={handleAddToCart}
-                disabled={product.stock === 0}
-              >
-                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-              </Button>
-              <button
-                type="button"
-                className={`detail-wishlist ${isWishlisted ? 'active' : ''}`}
-                onClick={() => toggleWishlist(product)}
-              >
-                {isWishlisted ? 'Remove Wishlist' : 'Add Wishlist'}
-              </button>
-            </div>
-
-            {!user && (
-              <p className="login-hint">You need to login to purchase, review, or ask questions.</p>
-            )}
-            {feedback && <p className="product-feedback">{feedback}</p>}
+            <Button variant="contained" color="success" startIcon={<FaShoppingCart />} onClick={handleAddToCart} disabled={product.stock === 0}>
+              {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            </Button>
+            <Button
+              variant={isWishlisted ? 'contained' : 'outlined'}
+              color="error"
+              startIcon={isWishlisted ? <FaHeart /> : <FaRegHeart />}
+              onClick={() => toggleWishlist(product)}
+            >
+              {isWishlisted ? 'Remove Wishlist' : 'Add Wishlist'}
+            </Button>
           </div>
 
-          <div className="additional-info">
-            <p>Secure checkout</p>
-            <p>Easy returns within 7 days</p>
-            <p>Free shipping on orders above Rs 500</p>
-          </div>
+          {!user && <Alert severity="info" className="!mt-5">Login to purchase, review, or ask questions.</Alert>}
+          {feedback && <Alert severity="success" className="!mt-5">{feedback}</Alert>}
         </div>
-      </div>
+      </section>
 
-      <section className="product-community">
-        <div className="community-panel">
-          <div className="panel-title-row">
-            <h2>Ratings & Reviews</h2>
-            <span>{reviews.length} reviews</span>
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className={`${panel} p-5`}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-950">Ratings & Reviews</h2>
+            <Chip label={`${reviews.length} reviews`} />
           </div>
-
-          <form className="review-form" onSubmit={handleReviewSubmit}>
-            <label>
-              Rating
-              <select
-                value={reviewForm.rating}
-                onChange={(e) => setReviewForm((current) => ({ ...current, rating: e.target.value }))}
-              >
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <option key={rating} value={rating}>{rating} star</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Review title
-              <input
-                value={reviewForm.title}
-                onChange={(e) => setReviewForm((current) => ({ ...current, title: e.target.value }))}
-                placeholder="Short title"
-                required
-              />
-            </label>
-            <label className="span-full">
-              Your review
-              <textarea
-                value={reviewForm.comment}
-                onChange={(e) => setReviewForm((current) => ({ ...current, comment: e.target.value }))}
-                placeholder="Product ke baare me apna experience likho"
-                rows="4"
-              />
-            </label>
-            <button type="submit" disabled={submittingReview}>
-              {submittingReview ? 'Submitting...' : 'Submit Review'}
-            </button>
+          <form onSubmit={handleReviewSubmit} className="mt-5 grid gap-4">
+            <TextField select label="Rating" value={reviewForm.rating} onChange={(event) => setReviewForm((current) => ({ ...current, rating: event.target.value }))}>
+              {[5, 4, 3, 2, 1].map((rating) => <MenuItem key={rating} value={rating}>{rating} star</MenuItem>)}
+            </TextField>
+            <TextField label="Review title" value={reviewForm.title} onChange={(event) => setReviewForm((current) => ({ ...current, title: event.target.value }))} required />
+            <TextField label="Your review" value={reviewForm.comment} onChange={(event) => setReviewForm((current) => ({ ...current, comment: event.target.value }))} multiline rows={4} />
+            <Button type="submit" variant="contained" color="success" disabled={submittingReview}>{submittingReview ? 'Submitting...' : 'Submit Review'}</Button>
           </form>
-
-          <div className="review-list">
-            {reviews.length === 0 && <p className="muted-text">Abhi koi review nahi hai.</p>}
+          <div className="mt-6 grid gap-3">
+            {reviews.length === 0 && <p className="text-sm text-slate-500">No reviews yet.</p>}
             {reviews.map((review) => (
-              <article key={review._id} className="review-item">
-                <div>
+              <article key={review._id} className="rounded-md bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-3">
                   <strong>{review.title}</strong>
-                  <span>{'★'.repeat(Number(review.rating || 0))}</span>
+                  <Rating value={Number(review.rating || 0)} readOnly size="small" />
                 </div>
-                <p>{review.comment || 'No comment added.'}</p>
-                <small>By {review.user?.name || 'Customer'}</small>
+                <p className="mt-2 text-sm text-slate-600">{review.comment || 'No comment added.'}</p>
+                <small className="text-slate-500">By {review.user?.name || 'Customer'}</small>
               </article>
             ))}
           </div>
         </div>
 
-        <div className="community-panel">
-          <div className="panel-title-row">
-            <h2>Product Q&A</h2>
-            <span>{questions.length} questions</span>
+        <div className={`${panel} p-5`}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-950">Product Q&A</h2>
+            <Chip label={`${questions.length} questions`} />
           </div>
-
-          <form className="question-form" onSubmit={handleQuestionSubmit}>
-            <textarea
-              value={questionText}
-              onChange={(e) => setQuestionText(e.target.value)}
-              placeholder="Product ke related question pucho"
-              rows="3"
-              required
-            />
-            <button type="submit" disabled={submittingQuestion}>
-              {submittingQuestion ? 'Submitting...' : 'Ask Question'}
-            </button>
+          <form onSubmit={handleQuestionSubmit} className="mt-5 grid gap-4">
+            <TextField label="Ask a question" value={questionText} onChange={(event) => setQuestionText(event.target.value)} multiline rows={3} required />
+            <Button type="submit" variant="contained" color="success" disabled={submittingQuestion}>{submittingQuestion ? 'Submitting...' : 'Ask Question'}</Button>
           </form>
-
-          <div className="question-list">
-            {questions.length === 0 && <p className="muted-text">Abhi koi question nahi hai.</p>}
+          <div className="mt-6 grid gap-3">
+            {questions.length === 0 && <p className="text-sm text-slate-500">No questions yet.</p>}
             {questions.map((question) => (
-              <article key={question._id} className="question-item">
+              <article key={question._id} className="rounded-md bg-slate-50 p-4">
                 <p><strong>Q:</strong> {question.question}</p>
-                {question.answer ? (
-                  <p className="answer"><strong>A:</strong> {question.answer}</p>
-                ) : (
-                  <p className="muted-text">Answer pending.</p>
-                )}
-                <small>Asked by {question.user?.name || 'Customer'}</small>
+                <p className="mt-2 text-sm text-slate-600"><strong>A:</strong> {question.answer || 'Answer pending.'}</p>
+                <small className="text-slate-500">Asked by {question.user?.name || 'Customer'}</small>
                 {canAnswerQuestions && (
-                  <div className="answer-box">
-                    <input
-                      value={answerDrafts[question._id] || ''}
-                      onChange={(e) =>
-                        setAnswerDrafts((current) => ({ ...current, [question._id]: e.target.value }))
-                      }
-                      placeholder="Write answer"
-                    />
-                    <button type="button" onClick={() => handleAnswerSubmit(question._id)}>Answer</button>
+                  <div className="mt-3 flex gap-2">
+                    <TextField size="small" value={answerDrafts[question._id] || ''} onChange={(event) => setAnswerDrafts((current) => ({ ...current, [question._id]: event.target.value }))} placeholder="Write answer" fullWidth />
+                    <Button variant="outlined" color="success" onClick={() => handleAnswerSubmit(question._id)}>Answer</Button>
                   </div>
                 )}
               </article>

@@ -23,9 +23,9 @@ function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="app">
+      <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
         <Header />
-        <main className="main-content">
+        <main className="w-full flex-1">
           <Routes>
             {/* If user has pending registration and tries to go to register, show verification pending */}
             <Route 

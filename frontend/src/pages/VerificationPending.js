@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import '../styles/VerificationPending.css';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Alert, Button, Chip, Step, StepLabel, Stepper } from '@mui/material';
+import { page, panel } from '../utils/ui';
 
 function VerificationPending() {
   const navigate = useNavigate();
@@ -9,128 +10,62 @@ function VerificationPending() {
 
   useEffect(() => {
     const pendingEmail = localStorage.getItem('pendingRegistrationEmail');
-    
     if (!email && !pendingEmail) {
       navigate('/register');
       return;
     }
-
-    const finalEmail = email || pendingEmail;
-    
-    if (finalEmail) {
-      localStorage.setItem('pendingRegistrationEmail', finalEmail);
+    if (email || pendingEmail) {
+      localStorage.setItem('pendingRegistrationEmail', email || pendingEmail);
     }
   }, [email, navigate]);
 
-  const handleGoToLogin = () => {
+  const clearPendingAndGo = (path) => {
     localStorage.removeItem('pendingRegistrationEmail');
-    navigate('/login');
-  };
-
-  const handleGoHome = () => {
-    localStorage.removeItem('pendingRegistrationEmail');
-    navigate('/');
+    navigate(path);
   };
 
   const finalEmail = email || localStorage.getItem('pendingRegistrationEmail');
 
   return (
-    <div className="verification-container">
-      <div className="verification-card">
-        <div className="verification-icon-success"></div>
-        <h1>रजसटरशन सफल | Registration Successful!</h1>
-        
-        <div className="verification-content">
-          <div className="success-box">
-            <p className="success-message">
-               आपक खत सफलतपरवक बनय गय!
-            </p>
-            <p className="email-display">
-              Email: <strong>{finalEmail}</strong>
-            </p>
+    <div className={`${page} grid place-items-center`}>
+      <section className={`${panel} w-full max-w-3xl p-6 sm:p-8`}>
+        <Chip label="Registration Successful" color="success" className="!font-bold" />
+        <h1 className="mt-4 text-3xl font-black text-slate-950">Your account is waiting for admin verification.</h1>
+        <p className="mt-2 text-slate-500">Email: <strong>{finalEmail}</strong></p>
+
+        <div className="mt-8">
+          <Stepper activeStep={1} alternativeLabel>
+            {['Account Created', 'Admin Verification', 'Ready to Login'].map((label) => (
+              <Step key={label}><StepLabel>{label}</StepLabel></Step>
+            ))}
+          </Stepper>
+        </div>
+
+        <Alert severity="info" className="!mt-8">
+          The administrator is reviewing your ID card. This usually takes 24-48 hours.
+        </Alert>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg bg-slate-50 p-4">
+            <h2 className="font-bold text-slate-950">What next?</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600">
+              <li>Your ID card image will be verified.</li>
+              <li>Admin approval is required before login access.</li>
+              <li>You can log in after the account is approved.</li>
+            </ul>
           </div>
-
-          <div className="processing-section">
-            <h2> परशसक सतयपन परकरय | Admin Verification Process</h2>
-            
-            <div className="processing-steps">
-              <div className="step completed">
-                <div className="step-number"></div>
-                <div className="step-content">
-                  <h4>खत बनय गय</h4>
-                  <p>Account Created</p>
-                </div>
-              </div>
-
-              <div className="step-connector"></div>
-
-              <div className="step active">
-                <div className="step-number"></div>
-                <div className="step-content">
-                  <h4>परशसक दवर सतयपन</h4>
-                  <p>Admin Verification</p>
-                </div>
-              </div>
-
-              <div className="step-connector"></div>
-
-              <div className="step">
-                <div className="step-number">3</div>
-                <div className="step-content">
-                  <h4>आप लगन कर सकग</h4>
-                  <p>Ready to Login</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="processing-status">
-              <div className="status-bar">
-                <div className="status-fill"></div>
-              </div>
-              <p className="status-text">परशसक आपक ID करड क समकष कर रह ह...</p>
-            </div>
-          </div>
-
-          <div className="info-boxes">
-            <div className="info-box">
-              <h3>कय हग? | What Next?</h3>
-              <ul>
-                <li> आपक ID करड क फट सतयपत क जएग</li>
-                <li> परशसक दवर मजर क इतजर</li>
-                <li> अनमत मलन पर ईमल दवर सचत कय जएग</li>
-                <li> फर आप समनय रप स लगन कर सकग</li>
-              </ul>
-            </div>
-
-            <div className="time-box">
-              <h3> अनमनत समय</h3>
-              <p><strong>24-48 घट</strong></p>
-              <p className="small-text">(Estimated Time)</p>
-            </div>
-          </div>
-
-          <div className="contact-box">
-            <h3> परशसक स सपरक कर</h3>
-            <p>Email: <strong>seller@shopkaro.com</strong></p>
-            <p>Phone: <strong>+91-9999999999</strong></p>
+          <div className="rounded-lg bg-slate-50 p-4">
+            <h2 className="font-bold text-slate-950">Contact Admin</h2>
+            <p className="mt-3 text-sm text-slate-600">Email: <strong>seller@shopkaro.com</strong></p>
+            <p className="text-sm text-slate-600">Phone: <strong>+91-9999999999</strong></p>
           </div>
         </div>
 
-        <div className="redirect-info">
-          <p className="countdown-text">
-             यह page तब तक खल रहग जब तक admin आपक verify न कर
-          </p>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <Button variant="contained" color="success" onClick={() => clearPendingAndGo('/login')}>Go to Login</Button>
+          <Button variant="outlined" color="success" onClick={() => clearPendingAndGo('/')}>Home Page</Button>
         </div>
-
-        <div className="button-group">
-          <button className="btn-back" onClick={handleGoToLogin}>
-            लगन पज पर जए | Go to Login
-          </button>
-          <button className="btn-home" onClick={handleGoHome}>
-            हम पज | Home Page
-          </button>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

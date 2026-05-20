@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Alert, Button, TextField } from '@mui/material';
 import { authAPI } from '../services/api';
 import { useAuthStore } from '../context/store';
-import '../styles/Auth.css';
+import { panel } from '../utils/ui';
 
 function Login() {
   const navigate = useNavigate();
@@ -11,13 +12,13 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
     setLoading(true);
 
@@ -40,34 +41,43 @@ function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1>Login</h1>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            inputMode="email"
+    <div className="grid min-h-[70vh] place-items-center px-4 py-10">
+      <section className={`${panel} w-full max-w-md p-6`}>
+        <h1 className="text-3xl font-black text-slate-950">Login</h1>
+        <p className="mt-2 text-sm text-slate-500">Access your account, orders, and saved products.</p>
+
+        {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
+
+        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+          <TextField
+            label="Username or Email"
             name="identifier"
-            placeholder="Username or Email"
             value={formData.identifier}
             onChange={handleChange}
             required
+            fullWidth
           />
-          <input
+          <TextField
+            label="Password"
             type="password"
             name="password"
-            placeholder="Password"
             value={formData.password}
             onChange={handleChange}
             required
+            fullWidth
           />
-          <button type="submit" disabled={loading}>
+          <Button type="submit" variant="contained" color="success" size="large" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
-          </button>
+          </Button>
         </form>
-        <p>Don't have an account? <Link to="/register">Register</Link></p>
-      </div>
+
+        <p className="mt-5 text-center text-sm text-slate-600">
+          Do not have an account?{' '}
+          <Link to="/register" className="font-bold text-emerald-700 hover:text-emerald-800">
+            Register
+          </Link>
+        </p>
+      </section>
     </div>
   );
 }

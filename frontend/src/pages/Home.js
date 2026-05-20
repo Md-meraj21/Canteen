@@ -1,34 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Button, Chip, Drawer, FormControl, InputLabel, MenuItem, Select, Skeleton } from '@mui/material';
 import ProductCard from '../components/ProductCard';
 import { productsAPI, categoriesAPI } from '../services/api';
-import '../styles/Home.css';
+import { page, panel } from '../utils/ui';
 
 const HERO_SLIDES = [
   {
     id: 1,
-    title: 'ShopKaro Canteen Specials',
+    title: 'ShopCart Canteen Specials',
     subtitle: 'Exclusive deals for personnel',
-    gradient: 'linear-gradient(135deg, #4B5320 0%, #2F3512 100%)',
-    emoji: '🎖️',
+    className: 'from-emerald-950 via-lime-950 to-slate-950',
   },
   {
     id: 2,
     title: 'Daily Essentials',
     subtitle: 'Groceries, home, health, and more',
-    gradient: 'linear-gradient(135deg, #2E8B57 0%, #006400 100%)',
-    emoji: '🛒',
+    className: 'from-emerald-900 via-teal-900 to-slate-950',
   },
   {
     id: 3,
     title: 'Electronics Deals',
     subtitle: 'Phones, laptops, accessories, and gear',
-    gradient: 'linear-gradient(135deg, #355E3B 0%, #1F3D2B 100%)',
-    emoji: '⚡',
+    className: 'from-slate-950 via-emerald-950 to-lime-950',
   },
 ];
 
-const Home = () => {
+function Home() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -57,7 +55,7 @@ const Home = () => {
         setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
         setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
       } catch (err) {
-        setError(err.response?.data?.error || 'Products load nahi ho pa rahe. Backend check karo.');
+        setError(err.response?.data?.error || 'Products are not loading. Please check the backend server.');
       } finally {
         setLoading(false);
       }
@@ -75,7 +73,6 @@ const Home = () => {
     const interval = setInterval(() => {
       setCurrentSlide((previous) => (previous + 1) % HERO_SLIDES.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -100,17 +97,9 @@ const Home = () => {
       );
     }
 
-    if (sortOption === 'price-low') {
-      result.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
-    }
-
-    if (sortOption === 'price-high') {
-      result.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
-    }
-
-    if (sortOption === 'rating') {
-      result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
-    }
+    if (sortOption === 'price-low') result.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+    if (sortOption === 'price-high') result.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+    if (sortOption === 'rating') result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
 
     return result;
   }, [products, selectedCategory, searchTerm, sortOption]);
@@ -120,120 +109,110 @@ const Home = () => {
     setShowFilters(false);
   };
 
-  return (
-    <div className="home-container">
-      <section className="hero-section">
-        <div className="hero-wrapper">
-          <div
-            className="hero-slide"
-            style={{ background: HERO_SLIDES[currentSlide].gradient }}
+  const filters = (
+    <div className="w-72 max-w-[85vw] p-4 lg:w-auto lg:max-w-none lg:p-0">
+      <h3 className="text-lg font-bold text-slate-950">Categories</h3>
+      <div className="mt-4 grid gap-2">
+        {categoryOptions.map((category) => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? 'contained' : 'outlined'}
+            color="success"
+            onClick={() => selectCategory(category)}
+            className="!justify-start"
           >
-            <div className="hero-content">
-              <span className="hero-emoji">{HERO_SLIDES[currentSlide].emoji}</span>
-              <h1 className="hero-title">{HERO_SLIDES[currentSlide].title}</h1>
-              <p className="hero-subtitle">{HERO_SLIDES[currentSlide].subtitle}</p>
-              <button type="button" className="hero-cta">Shop Now</button>
-            </div>
-          </div>
+            {category === 'All' ? 'All Products' : category}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
 
-          <div className="hero-dots">
-            {HERO_SLIDES.map((slide, index) => (
-              <button
-                key={slide.id}
-                type="button"
-                aria-label={`Show slide ${index + 1}`}
-                className={`dot ${index === currentSlide ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
+  const slide = HERO_SLIDES[currentSlide];
+
+  return (
+    <div className={page}>
+      <section className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${slide.className} px-4 py-4 text-white shadow-lg sm:px-8 sm:py-7`}>
+        <div className="max-w-2xl">
+          <Chip label="Canteen Specials" size="small" className="!mb-3 !hidden !bg-white/15 !font-bold !text-white sm:!inline-flex" />
+          <h1 className="text-xl font-black tracking-tight sm:text-3xl">{slide.title}</h1>
+          <p className="mt-1.5 max-w-xl text-sm text-emerald-50 sm:mt-2 sm:text-base">{slide.subtitle}</p>
+          <Button variant="contained" color="success" size="small" className="!mt-3 sm:!mt-4 sm:!text-sm">
+            Shop Now
+          </Button>
+        </div>
+        <div className="mt-3 flex gap-2 sm:mt-5">
+          {HERO_SLIDES.map((hero, index) => (
+            <button
+              key={hero.id}
+              type="button"
+              aria-label={`Show slide ${index + 1}`}
+              className={`h-2.5 rounded-full transition ${index === currentSlide ? 'w-9 bg-white' : 'w-2.5 bg-white/45'}`}
+              onClick={() => setCurrentSlide(index)}
+            />
+          ))}
         </div>
       </section>
 
-      <section className="main-content-section">
-        <div className="content-wrapper">
-          {showFilters && (
-            <button
-              type="button"
-              className="filter-backdrop"
-              aria-label="Close filters"
-              onClick={() => setShowFilters(false)}
-            />
+      <section className="mt-8 grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className={`${panel} hidden h-max self-start p-4 lg:block`}>{filters}</aside>
+        <Drawer open={showFilters} onClose={() => setShowFilters(false)} PaperProps={{ className: '!max-w-[90vw]' }}>
+          {filters}
+        </Drawer>
+
+        <main className="min-w-0">
+          <div className={`${panel} flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between`}>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-950">
+                {selectedCategory === 'All' ? 'All Products' : selectedCategory}
+              </h2>
+              <p className="text-sm text-slate-500">{filteredProducts.length} items found</p>
+            </div>
+
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 sm:flex">
+              <Button variant="outlined" color="success" onClick={() => setShowFilters(true)} className="lg:!hidden">
+                Filters
+              </Button>
+              <FormControl size="small" className="min-w-0 sm:min-w-48">
+                <InputLabel>Sort</InputLabel>
+                <Select label="Sort" value={sortOption} onChange={(event) => setSortOption(event.target.value)}>
+                  <MenuItem value="default">Popularity</MenuItem>
+                  <MenuItem value="price-low">Price: Low to High</MenuItem>
+                  <MenuItem value="price-high">Price: High to Low</MenuItem>
+                  <MenuItem value="rating">Average Rating</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          </div>
+
+          {loading && (
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton key={index} variant="rounded" height={420} />
+              ))}
+            </div>
           )}
 
-          <aside className={`filter-sidebar ${showFilters ? 'show' : ''}`}>
-            <div className="filter-header-mobile">
-              <h3>Filters</h3>
-              <button type="button" onClick={() => setShowFilters(false)}>×</button>
+          {error && <div className={`${panel} mt-6 p-6 text-red-700`}>{error}</div>}
+
+          {!loading && !error && filteredProducts.length > 0 && (
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
             </div>
+          )}
 
-            <div className="filter-group">
-              <h3 className="filter-title">Categories</h3>
-              <div className="category-list">
-                {categoryOptions.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    className={`category-item ${selectedCategory === category ? 'active' : ''}`}
-                    onClick={() => selectCategory(category)}
-                  >
-                    <span>{category === 'All' ? 'All Products' : category}</span>
-                  </button>
-                ))}
-              </div>
+          {!loading && !error && filteredProducts.length === 0 && (
+            <div className={`${panel} mt-6 p-10 text-center`}>
+              <h3 className="text-lg font-bold text-slate-950">No products found</h3>
+              <p className="mt-2 text-sm text-slate-500">Try a different category or search term.</p>
             </div>
-          </aside>
-
-          <main className="products-main">
-            <div className="products-header-bar">
-              <div className="header-left">
-                <h2>{selectedCategory === 'All' ? 'All Products' : selectedCategory}</h2>
-                <span className="product-count">({filteredProducts.length} items)</span>
-              </div>
-
-              <div className="products-actions">
-                <button
-                  type="button"
-                  className="toggle-filter-btn"
-                  onClick={() => setShowFilters(true)}
-                >
-                  Filters
-                </button>
-                <select
-                  className="sort-dropdown"
-                  value={sortOption}
-                  onChange={(event) => setSortOption(event.target.value)}
-                >
-                  <option value="default">Popularity</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Average Rating</option>
-                </select>
-              </div>
-            </div>
-
-            {loading && <div className="loading-state">Loading products...</div>}
-            {error && <div className="empty-state">{error}</div>}
-
-            {!loading && !error && filteredProducts.length > 0 && (
-              <div className="products-grid">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))}
-              </div>
-            )}
-
-            {!loading && !error && filteredProducts.length === 0 && (
-              <div className="empty-state">
-                <span className="empty-icon">🔍</span>
-                <p>No products found.</p>
-              </div>
-            )}
-          </main>
-        </div>
+          )}
+        </main>
       </section>
     </div>
   );
-};
+}
 
 export default Home;

@@ -1,136 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, CircularProgress, TextField } from '@mui/material';
 import { usersAPI } from '../services/api';
-import '../styles/Profile.css';
+import { page, panel } from '../utils/ui';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await usersAPI.getProfile();
+        setUser(response.data);
+        setFormData(response.data);
+      } catch (error) {
+        setMessage('Failed to load profile.');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await usersAPI.getProfile();
-      setUser(response.data);
-      setFormData(response.data);
-    } catch (error) {
-      console.error('Failed to load profile:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleAddressChange = (field, value) => {
+    setFormData((previous) => ({
+      ...previous,
+      address: { ...previous.address, [field]: value },
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
       await usersAPI.updateProfile(formData);
       setUser(formData);
       setIsEditing(false);
-      alert('Profile updated successfully');
+      setMessage('Profile updated successfully.');
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      alert('Failed to update profile');
+      setMessage('Failed to update profile.');
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) {
+    return (
+      <div className={`${page} grid min-h-[40vh] place-items-center`}>
+        <CircularProgress color="success" />
+      </div>
+    );
+  }
 
   return (
-    <div className="profile-container">
-      <h1>My Profile</h1>
+    <div className={page}>
+      <h1 className="text-3xl font-black text-slate-950">My Profile</h1>
+      {message && <Alert severity={message.includes('successfully') ? 'success' : 'error'} className="!mt-4">{message}</Alert>}
 
-      <div className="profile-card">
+      <section className={`${panel} mt-6 p-6`}>
         {!isEditing ? (
-          <>
-            <div className="profile-info">
-              <div className="info-row">
-                <label>Name:</label>
-                <span>{user?.name}</span>
-              </div>
-              <div className="info-row">
-                <label>Email:</label>
-                <span>{user?.email}</span>
-              </div>
-              <div className="info-row">
-                <label>Phone:</label>
-                <span>{user?.phone}</span>
-              </div>
-              {user?.address && (
-                <>
-                  <div className="info-row">
-                    <label>Address:</label>
-                    <span>
-                      {user.address.street}, {user.address.city}, {user.address.state} {user.address.zipCode}
-                    </span>
-                  </div>
-                </>
-              )}
+          <div className="grid gap-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                ['Name', user?.name],
+                ['Email', user?.email],
+                ['Phone', user?.phone],
+                ['Address', user?.address ? `${user.address.street}, ${user.address.city}, ${user.address.state} ${user.address.zipCode}` : 'Not added'],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-md bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                  <p className="mt-1 font-semibold text-slate-950">{value || 'Not added'}</p>
+                </div>
+              ))}
             </div>
-            <button className="btn-edit" onClick={() => setIsEditing(true)}>
+            <Button variant="contained" color="success" className="!w-max" onClick={() => setIsEditing(true)}>
               Edit Profile
-            </button>
-          </>
+            </Button>
+          </div>
         ) : (
-          <form onSubmit={handleSubmit} className="profile-form">
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name || ''}
-              onChange={handleChange}
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email || ''}
-              onChange={handleChange}
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone"
-              value={formData.phone || ''}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="street"
-              placeholder="Street"
-              value={formData.address?.street || ''}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                address: { ...prev.address, street: e.target.value }
-              }))}
-            />
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              value={formData.address?.city || ''}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                address: { ...prev.address, city: e.target.value }
-              }))}
-            />
-            <div className="form-actions">
-              <button type="submit" className="btn-save">Save</button>
-              <button type="button" className="btn-cancel" onClick={() => setIsEditing(false)}>
-                Cancel
-              </button>
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            <TextField label="Name" name="name" value={formData.name || ''} onChange={handleChange} fullWidth />
+            <TextField label="Email" name="email" value={formData.email || ''} onChange={handleChange} fullWidth />
+            <TextField label="Phone" name="phone" value={formData.phone || ''} onChange={handleChange} fullWidth />
+            <TextField label="Street" value={formData.address?.street || ''} onChange={(event) => handleAddressChange('street', event.target.value)} fullWidth />
+            <TextField label="City" value={formData.address?.city || ''} onChange={(event) => handleAddressChange('city', event.target.value)} fullWidth />
+            <TextField label="State" value={formData.address?.state || ''} onChange={(event) => handleAddressChange('state', event.target.value)} fullWidth />
+            <div className="flex gap-3 sm:col-span-2">
+              <Button type="submit" variant="contained" color="success">Save</Button>
+              <Button type="button" variant="outlined" onClick={() => setIsEditing(false)}>Cancel</Button>
             </div>
           </form>
         )}
-      </div>
+      </section>
     </div>
   );
 }
