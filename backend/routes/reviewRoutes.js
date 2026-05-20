@@ -1,5 +1,7 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Review = require('../models/Review');
+const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,6 +23,14 @@ router.get('/product/:productId', async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
+    if (!productId || !rating || !title?.trim()) {
+      return res.status(400).json({ error: 'Product, rating, and title are required' });
+    }
+
+    const existingReview = await Review.findOne({ product: productId, user: req.user.id });
+    if (existingReview) {
+      return res.status(400).json({ error: 'You have already reviewed this product' });
+    }
 
     const review = new Review({
       product: productId,
@@ -31,6 +41,8 @@ router.post('/', authMiddleware, async (req, res) => {
     });
 
     await review.save();
+    await updateProductRating(productId);
+    await review.populate('user', 'name avatar');
     res.status(201).json({ message: 'Review created successfully', review });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -52,6 +64,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
     Object.assign(review, req.body);
     await review.save();
+    await updateProductRating(review.product);
 
     res.json({ message: 'Review updated', review });
   } catch (error) {
@@ -72,11 +85,33 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
+    const productId = review.product;
     await Review.deleteOne({ _id: req.params.id });
+    await updateProductRating(productId);
     res.json({ message: 'Review deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+const updateProductRating = async (productId) => {
+  const productObjectId = new mongoose.Types.ObjectId(productId);
+  const stats = await Review.aggregate([
+    { $match: { product: productObjectId } },
+    {
+      $group: {
+        _id: '$product',
+        rating: { $avg: '$rating' },
+        numberOfReviews: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const ratingData = stats[0] || { rating: 0, numberOfReviews: 0 };
+  await Product.findByIdAndUpdate(productId, {
+    rating: Number(Number(ratingData.rating || 0).toFixed(1)),
+    numberOfReviews: ratingData.numberOfReviews || 0
+  });
+};
 
 module.exports = router;

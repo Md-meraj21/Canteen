@@ -99,6 +99,7 @@ const AdminDashboard = () => {
           setPendingUsers([]);
         }
       }
+      setMessage("Dashboard refreshed.");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to load dashboard data.");
     } finally {
@@ -250,8 +251,8 @@ const AdminDashboard = () => {
             <p className="admin-eyebrow">Inventory Control</p>
             <h1>Products Dashboard</h1>
           </div>
-          <button type="button" className="secondary-btn" onClick={fetchDashboard}>
-            Refresh
+          <button type="button" className="secondary-btn" onClick={fetchDashboard} disabled={loading}>
+            {loading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 

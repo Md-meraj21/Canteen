@@ -106,3 +106,45 @@ export const useCartStore = create((set, get) => ({
     set({ items: [], totalPrice: 0 });
   },
 }));
+
+const loadWishlistFromStorage = () => {
+  try {
+    const saved = localStorage.getItem('wishlist');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveWishlistToStorage = (items) => {
+  try {
+    localStorage.setItem('wishlist', JSON.stringify(items));
+  } catch {
+    console.error('Failed to save wishlist to localStorage');
+  }
+};
+
+export const useWishlistStore = create((set, get) => ({
+  items: loadWishlistFromStorage(),
+
+  isWishlisted: (productId) => get().items.some((product) => product._id === productId),
+
+  toggleItem: (product) => {
+    set((state) => {
+      const exists = state.items.some((item) => item._id === product._id);
+      const items = exists
+        ? state.items.filter((item) => item._id !== product._id)
+        : [product, ...state.items];
+      saveWishlistToStorage(items);
+      return { items };
+    });
+  },
+
+  removeItem: (productId) => {
+    set((state) => {
+      const items = state.items.filter((item) => item._id !== productId);
+      saveWishlistToStorage(items);
+      return { items };
+    });
+  },
+}));

@@ -10,6 +10,10 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+.product-detail-page {
+  padding: 1px 0 32px;
+}
+
 .product-images {
   display: flex;
   flex-direction: column;
@@ -205,6 +209,36 @@
   border-top: 1px solid #eee;
 }
 
+.purchase-actions {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.detail-wishlist {
+  border: 1px solid #e11d48;
+  border-radius: 6px;
+  background: #fff;
+  color: #be123c;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 12px 18px;
+}
+
+.detail-wishlist.active {
+  background: #fff1f2;
+}
+
+.product-feedback {
+  background: #eef9ee;
+  border-left: 4px solid #4CAF50;
+  border-radius: 4px;
+  color: #246b2a;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .quantity-selector {
   display: flex;
   align-items: center;
@@ -301,6 +335,129 @@
   margin-bottom: 0;
 }
 
+.product-community {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.community-panel {
+  background: #fff;
+  border: 1px solid #dde5d7;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 22px;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-title-row h2 {
+  color: #111;
+  font-size: 20px;
+  margin: 0;
+}
+
+.panel-title-row span,
+.muted-text,
+.review-item small,
+.question-item small {
+  color: #667085;
+}
+
+.review-form {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.review-form label,
+.question-form {
+  display: grid;
+  gap: 7px;
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea,
+.question-form textarea,
+.answer-box input {
+  border: 1px solid #cfd8c8;
+  border-radius: 6px;
+  color: #1f2421;
+  font: inherit;
+  padding: 10px 11px;
+  width: 100%;
+}
+
+.span-full {
+  grid-column: 1 / -1;
+}
+
+.review-form button,
+.question-form button,
+.answer-box button {
+  border: 0;
+  border-radius: 6px;
+  background: #4b5320;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 11px 14px;
+}
+
+.review-list,
+.question-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-item,
+.question-item {
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 7px;
+  padding-top: 12px;
+}
+
+.review-item div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-item span {
+  color: #C19A6B;
+}
+
+.review-item p,
+.question-item p {
+  color: #334155;
+  margin: 0;
+}
+
+.answer {
+  background: #f1f8ef;
+  border-left: 3px solid #4b7c53;
+  padding: 9px 10px;
+}
+
+.answer-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 6px;
+}
+
 @media (max-width: 768px) {
   .product-detail {
     grid-template-columns: 1fr;
@@ -327,5 +484,22 @@
   .quantity-controls {
     flex: 1;
     min-width: 150px;
+  }
+
+  .product-community {
+    grid-template-columns: 1fr;
+    padding: 0 20px;
+  }
+
+  .review-form {
+    grid-template-columns: 1fr;
+  }
+
+  .span-full {
+    grid-column: auto;
+  }
+
+  .answer-box {
+    grid-template-columns: 1fr;
   }
 }

@@ -17,7 +17,12 @@ router.get('/', async (req, res) => {
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+        { 'specifications.brand': { $regex: search, $options: 'i' } },
+        { 'specifications.model': { $regex: search, $options: 'i' } },
+        { 'specifications.color': { $regex: search, $options: 'i' } },
+        { 'specifications.material': { $regex: search, $options: 'i' } }
       ];
     }
 
@@ -50,16 +55,28 @@ router.get('/:id', async (req, res) => {
 // Create product (Admin/Seller only)
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { name, description, price, category, images, stock } = req.body;
+    const {
+      name,
+      description,
+      price,
+      originalPrice,
+      discount,
+      category,
+      images,
+      stock,
+      specifications
+    } = req.body;
 
     const product = new Product({
       name,
       description,
       price,
-      originalPrice: price,
+      originalPrice: originalPrice || price,
+      discount: discount || 0,
       category,
       images,
       stock,
+      specifications,
       seller: req.user.id
     });
 

@@ -33,6 +33,36 @@
   margin-bottom: 20px;
 }
 
+.saved-location-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #dbe5d4;
+  border-radius: 6px;
+  background: #f8faf7;
+  color: #334155;
+  font-size: 14px;
+}
+
+.saved-location-note.muted {
+  justify-content: flex-start;
+  color: #64748b;
+}
+
+.saved-location-note button {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 6px;
+  background: #4b7c53;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
 .checkout-form input,
 .checkout-form label {
   display: block;

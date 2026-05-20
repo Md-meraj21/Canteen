@@ -45,8 +45,13 @@ const Home = () => {
       setLoading(true);
       setError('');
       try {
+        const categoryParam = searchParams.get('category') || '';
+        const searchParam = searchParams.get('search') || '';
         const [productsRes, categoriesRes] = await Promise.all([
-          productsAPI.getAll(),
+          productsAPI.getAll({
+            category: categoryParam && categoryParam !== 'All' ? categoryParam : undefined,
+            search: searchParam || undefined,
+          }),
           categoriesAPI.getAll(),
         ]);
         setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
@@ -59,7 +64,7 @@ const Home = () => {
     };
 
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     setSelectedCategory(searchParams.get('category') || 'All');

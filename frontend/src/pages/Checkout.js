@@ -9,20 +9,46 @@ function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { items, totalPrice, clearCart } = useCartStore();
-  const [formData, setFormData] = useState({
+  const getSavedLocation = () => {
+    try {
+      const savedDetails = localStorage.getItem('selectedLocationDetails');
+      if (savedDetails) {
+        return JSON.parse(savedDetails);
+      }
+
+      const savedLabel = localStorage.getItem('selectedLocation');
+      if (!savedLabel) return null;
+      const [city = '', state = '', country = ''] = savedLabel.split(',').map((item) => item.trim());
+      return { label: savedLabel, city, state, country };
+    } catch {
+      return null;
+    }
+  };
+  const [savedLocation] = useState(getSavedLocation);
+  const [formData, setFormData] = useState(() => ({
     street: '',
-    city: '',
-    state: '',
+    city: savedLocation?.city || '',
+    state: savedLocation?.state || '',
     zipCode: '',
-    country: '',
+    country: savedLocation?.country || '',
     phone: '',
     paymentMethod: 'credit-card',
-  });
+  }));
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const applySavedLocation = () => {
+    if (!savedLocation) return;
+    setFormData((prev) => ({
+      ...prev,
+      city: savedLocation.city || prev.city,
+      state: savedLocation.state || prev.state,
+      country: savedLocation.country || prev.country,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -90,6 +116,16 @@ function Checkout() {
         <form className="checkout-form" onSubmit={handleSubmit}>
           <section>
             <h2>Shipping Address</h2>
+            {savedLocation ? (
+              <div className="saved-location-note">
+                <span>Using saved location: {savedLocation.label}</span>
+                <button type="button" onClick={applySavedLocation}>Apply</button>
+              </div>
+            ) : (
+              <div className="saved-location-note muted">
+                No saved location found. You can enter the address manually.
+              </div>
+            )}
             <input
               type="text"
               name="street"

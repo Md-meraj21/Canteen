@@ -33,6 +33,46 @@ export const productsAPI = {
   delete: (id) => api.delete(`/products/${id}`),
 };
 
+export const locationAPI = {
+  search: (query) => {
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const apiUrl = import.meta.env.VITE_OPENWEATHER_GEO_API_URL;
+    if (!apiKey) {
+      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
+    }
+    if (!apiUrl) {
+      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
+    }
+
+    return axios.get(apiUrl, {
+      params: {
+        q: query,
+        limit: 5,
+        appid: apiKey,
+      },
+    });
+  },
+  reverse: (lat, lon) => {
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const apiUrl = import.meta.env.VITE_OPENWEATHER_REVERSE_GEO_API_URL;
+    if (!apiKey) {
+      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
+    }
+    if (!apiUrl) {
+      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
+    }
+
+    return axios.get(apiUrl, {
+      params: {
+        lat,
+        lon,
+        limit: 1,
+        appid: apiKey,
+      },
+    });
+  },
+};
+
 // Categories API
 export const categoriesAPI = {
   getAll: () => api.get('/categories'),
@@ -52,7 +92,8 @@ export const cartAPI = {
 // Orders API
 export const ordersAPI = {
   create: (data) => api.post('/orders', data),
-  getAll: () => api.get('/orders'),
+  getMine: () => api.get('/orders'),
+  getAll: () => api.get('/orders/admin/all'),
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
 };
@@ -73,6 +114,12 @@ export const reviewsAPI = {
   create: (data) => api.post('/reviews', data),
   update: (id, data) => api.put(`/reviews/${id}`, data),
   delete: (id) => api.delete(`/reviews/${id}`),
+};
+
+export const questionsAPI = {
+  getByProduct: (productId) => api.get(`/questions/product/${productId}`),
+  create: (data) => api.post('/questions', data),
+  answer: (id, answer) => api.put(`/questions/${id}/answer`, { answer }),
 };
 
 export default api;

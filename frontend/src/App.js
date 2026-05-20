@@ -15,6 +15,7 @@ import VerificationPending from './pages/VerificationPending';
 import VerificationDashboard from './pages/VerificationDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminDashboard from './pages/AdminDashboard';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   // Check if user has pending registration
@@ -34,6 +35,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/login" element={<Login />} />

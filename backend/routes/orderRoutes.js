@@ -1,6 +1,6 @@
 const express = require('express');
 const Order = require('../models/Order');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -31,20 +31,23 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Get user's orders (for customer)
+// Get all orders (Admin only)
+router.get('/admin/all', adminMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('items.product')
+      .populate('user', 'name email phone')
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get logged-in user's orders only
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    // Check if user is admin
-    const user = await require('../models/User').findById(req.user.id);
-    if (user.role === 'admin') {
-      // Admin gets all orders
-      const orders = await Order.find()
-        .populate('items.product')
-        .populate('user', 'name email phone')
-        .sort({ createdAt: -1 });
-      return res.json(orders);
-    }
-    // Regular customer gets only their orders
     const orders = await Order.find({ user: req.user.id })
       .populate('items.product')
       .sort({ createdAt: -1 });

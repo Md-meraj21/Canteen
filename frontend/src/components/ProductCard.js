@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCartStore } from '../context/store';
+import { useCartStore, useWishlistStore } from '../context/store';
 import '../styles/ProductCard.css';
 
 function ProductCard({ product }) {
   const [imageError, setImageError] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
+  const isWishlisted = useWishlistStore((state) => state.isWishlisted(product._id));
   const discountPercent = product.discount || 0;
   const displayPrice = product.price;
 
@@ -14,6 +16,12 @@ function ProductCard({ product }) {
     e.stopPropagation();
     addItem(product, 1);
     alert(`${product.name} added to cart!`);
+  };
+
+  const handleToggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
   };
 
   const fallbackImage = 'https://via.placeholder.com/300x300?text=' + encodeURIComponent(product.name.substring(0, 20));
@@ -30,6 +38,14 @@ function ProductCard({ product }) {
           {discountPercent > 0 && (
             <span className="discount-badge">{discountPercent}% OFF</span>
           )}
+          <button
+            type="button"
+            className={`wishlist-toggle ${isWishlisted ? 'active' : ''}`}
+            onClick={handleToggleWishlist}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            ♥
+          </button>
         </div>
         <div className="product-info">
           <h3>{product.name}</h3>

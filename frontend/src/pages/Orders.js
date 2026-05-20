@@ -8,12 +8,23 @@ function Orders() {
 
   useEffect(() => {
     fetchOrders();
+    const interval = setInterval(fetchOrders, 5000);
+
+    const handleFocus = () => {
+      fetchOrders();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const fetchOrders = async () => {
     try {
-      const response = await ordersAPI.getAll();
-      setOrders(response.data);
+      const response = await ordersAPI.getMine();
+      setOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Failed to load orders:', error);
     } finally {
