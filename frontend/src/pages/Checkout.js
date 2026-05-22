@@ -25,10 +25,10 @@ function Checkout() {
   const { items, totalPrice, clearCart } = useCartStore();
   const [savedLocation] = useState(getSavedLocation);
   const [formData, setFormData] = useState(() => ({
-    street: '',
+    street: savedLocation?.street || '',
     city: savedLocation?.city || '',
     state: savedLocation?.state || '',
-    zipCode: '',
+    zipCode: savedLocation?.zipCode || '',
     country: savedLocation?.country || '',
     phone: '',
     paymentMethod: 'credit-card',
@@ -45,8 +45,10 @@ function Checkout() {
     if (!savedLocation) return;
     setFormData((previous) => ({
       ...previous,
+      street: savedLocation.street || previous.street,
       city: savedLocation.city || previous.city,
       state: savedLocation.state || previous.state,
+      zipCode: savedLocation.zipCode || previous.zipCode,
       country: savedLocation.country || previous.country,
     }));
   };

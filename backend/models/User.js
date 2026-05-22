@@ -64,8 +64,32 @@ const userSchema = new mongoose.Schema({
   },
   verificationStatus: {
     type: String,
-    enum: ['pending', 'verified', 'rejected'],
+    enum: ['email_unverified', 'pending', 'verified', 'rejected'],
     default: 'pending'
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailOtpHash: {
+    type: String,
+    default: null,
+    select: false
+  },
+  emailOtpExpires: {
+    type: Date,
+    default: null,
+    select: false
+  },
+  resetPasswordOtpHash: {
+    type: String,
+    default: null,
+    select: false
+  },
+  resetPasswordOtpExpires: {
+    type: Date,
+    default: null,
+    select: false
   },
   verificationNotes: {
     type: String,

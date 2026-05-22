@@ -21,7 +21,11 @@ api.interceptors.request.use((config) => {
 // Auth API
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
+  verifyRegistrationOtp: (data) => api.post('/auth/verify-registration-otp', data),
+  resendRegistrationOtp: (email) => api.post('/auth/resend-registration-otp', { email }),
   login: (credentials) => api.post('/auth/login', credentials),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 // Products API
@@ -71,6 +75,7 @@ export const locationAPI = {
       },
     });
   },
+  reverseAddress: (lat, lon) => api.get('/location/reverse-address', { params: { lat, lon } }),
 };
 
 // Categories API

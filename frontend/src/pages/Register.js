@@ -29,8 +29,13 @@ function Register() {
     rank: '',
   });
   const [idCardPreview, setIdCardPreview] = useState(null);
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -60,19 +65,56 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setMessage('');
     setLoading(true);
 
     try {
-      await authAPI.register({
+      const response = await authAPI.register({
         ...formData,
         idCardImage: idCardPreview || null,
       });
-      localStorage.setItem('pendingRegistrationEmail', formData.email);
-      navigate('/verification-pending', { state: { email: formData.email } });
+      setOtpSent(true);
+      setVerifiedEmail(response.data.email || formData.email);
+      setMessage(response.data.message || 'OTP sent to your email.');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      await authAPI.verifyRegistrationOtp({
+        email: verifiedEmail || formData.email,
+        otp,
+      });
+      localStorage.setItem('pendingRegistrationEmail', verifiedEmail || formData.email);
+      navigate('/verification-pending', { state: { email: verifiedEmail || formData.email } });
+    } catch (err) {
+      setError(err.response?.data?.error || 'OTP verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError('');
+    setMessage('');
+    setResending(true);
+
+    try {
+      const response = await authAPI.resendRegistrationOtp(verifiedEmail || formData.email);
+      setMessage(response.data.message || 'OTP sent again.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not resend OTP');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -84,7 +126,9 @@ function Register() {
         <p className="mt-2 text-sm text-slate-500">Your account will be reviewed before shopping access is enabled.</p>
 
         {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
+        {message && <Alert severity="success" className="!mt-5">{message}</Alert>}
 
+        {!otpSent ? (
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
           <TextField label="Full Name" name="name" value={formData.name} onChange={handleChange} required fullWidth />
           <TextField
@@ -126,13 +170,37 @@ function Register() {
           </div>
 
           <Alert severity="warning" className="sm:col-span-2">
-            Your ID card image will be sent to the administrator for verification.
+            Your email will be verified by OTP first, then your ID card will be sent to the administrator.
           </Alert>
 
           <Button type="submit" variant="contained" color="success" size="large" disabled={loading} className="sm:col-span-2">
-            {loading ? 'Registering...' : 'Register and Wait for Verification'}
+            {loading ? 'Sending OTP...' : 'Send Email OTP'}
           </Button>
         </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="mt-6 grid gap-4">
+            <Alert severity="info">
+              OTP sent to {verifiedEmail || formData.email}. Verify it to submit your registration for admin approval.
+            </Alert>
+            <TextField
+              label="Email OTP"
+              value={otp}
+              onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+              inputProps={{ inputMode: 'numeric', maxLength: 6 }}
+              required
+              fullWidth
+            />
+            <Button type="submit" variant="contained" color="success" size="large" disabled={loading || otp.length !== 6}>
+              {loading ? 'Verifying...' : 'Verify OTP and Submit'}
+            </Button>
+            <Button type="button" variant="outlined" color="success" disabled={resending} onClick={handleResendOtp}>
+              {resending ? 'Sending...' : 'Resend OTP'}
+            </Button>
+            <Button type="button" color="inherit" onClick={() => setOtpSent(false)}>
+              Edit registration details
+            </Button>
+          </form>
+        )}
 
         <p className="mt-5 text-center text-sm text-slate-600">
           Already have an account?{' '}

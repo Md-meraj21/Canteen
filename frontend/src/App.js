@@ -16,6 +16,7 @@ import VerificationDashboard from './pages/VerificationDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminDashboard from './pages/AdminDashboard';
 import Wishlist from './pages/Wishlist';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   // Check if user has pending registration
@@ -39,6 +40,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verification-pending" element={<VerificationPending />} />
             <Route path="/admin/verification" element={<VerificationDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />

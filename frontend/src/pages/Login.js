@@ -12,6 +12,12 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const completeLogin = (user, token) => {
+    setUser(user);
+    setToken(token);
+    navigate(user?.role === 'admin' ? '/admin' : '/');
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((previous) => ({ ...previous, [name]: value }));
@@ -30,9 +36,7 @@ function Login() {
         username: loginId,
         password: formData.password,
       });
-      setUser(response.data.user);
-      setToken(response.data.token);
-      navigate(response.data.user?.role === 'admin' ? '/admin' : '/');
+      completeLogin(response.data.user, response.data.token);
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -70,6 +74,12 @@ function Login() {
             {loading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
+
+        <p className="mt-4 text-center text-sm">
+          <Link to="/forgot-password" className="font-bold text-emerald-700 hover:text-emerald-800">
+            Forgot password?
+          </Link>
+        </p>
 
         <p className="mt-5 text-center text-sm text-slate-600">
           Do not have an account?{' '}

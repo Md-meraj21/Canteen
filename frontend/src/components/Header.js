@@ -31,6 +31,13 @@ function Header() {
   const [isLocating, setIsLocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [accountAnchor, setAccountAnchor] = useState(null);
+  const [savedAddressDetails, setSavedAddressDetails] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('selectedLocationDetails') || '{}');
+    } catch {
+      return {};
+    }
+  });
   const [selectedLocation, setSelectedLocation] = useState(() => {
     try {
       return localStorage.getItem('selectedLocation') || '';
@@ -41,24 +48,47 @@ function Header() {
 
   const formatLocation = (location) => [location.name, location.state, location.country].filter(Boolean).join(', ');
 
-  const saveLocation = (location) => {
-    const label = formatLocation(location);
+  const getStreetAddress = (address = {}) => [
+    address.house_number,
+    address.road,
+    address.neighbourhood || address.suburb || address.quarter,
+  ].filter(Boolean).join(', ');
+
+  const saveLocation = (location, addressDetails = {}) => {
+    const address = addressDetails.address || {};
+    const city = location.name || address.city || address.town || address.village || address.county || '';
+    const state = location.state || address.state || '';
+    const country = location.country || address.country || '';
+    const label = [city, state, country].filter(Boolean).join(', ');
     const details = {
       label,
-      city: location.name || '',
-      state: location.state || '',
-      country: location.country || '',
+      street: getStreetAddress(address),
+      city,
+      state,
+      zipCode: address.postcode || '',
+      country,
       latitude: location.lat,
       longitude: location.lon,
     };
 
     setSelectedLocation(label);
+    setSavedAddressDetails(details);
     localStorage.setItem('selectedLocation', label);
     localStorage.setItem('selectedLocationDetails', JSON.stringify(details));
     setLocationQuery('');
     setLocationResults([]);
-    setLocationMessage('');
+    setLocationMessage(details.zipCode ? `PIN code found: ${details.zipCode}` : 'Location saved, but PIN code was not returned by the map API.');
     setIsLocationOpen(false);
+  };
+
+  const saveLocationWithAddress = async (location) => {
+    try {
+      setLocationMessage('Fetching street address and ZIP code...');
+      const response = await locationAPI.reverseAddress(location.lat, location.lon);
+      saveLocation(location, response.data);
+    } catch {
+      saveLocation(location);
+    }
   };
 
   const handleLogout = () => {
@@ -110,9 +140,14 @@ function Header() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const response = await locationAPI.reverse(latitude, longitude);
-          const firstLocation = Array.isArray(response.data) ? response.data[0] : null;
-          if (firstLocation) saveLocation(firstLocation);
+          const [locationResponse, addressResponse] = await Promise.allSettled([
+            locationAPI.reverse(latitude, longitude),
+            locationAPI.reverseAddress(latitude, longitude),
+          ]);
+          const firstLocation = locationResponse.status === 'fulfilled' && Array.isArray(locationResponse.value.data)
+            ? locationResponse.value.data[0]
+            : null;
+          if (firstLocation) saveLocation(firstLocation, addressResponse.status === 'fulfilled' ? addressResponse.value.data : {});
           else setLocationMessage('Unable to read live location');
         } catch (error) {
           setLocationMessage(
@@ -238,13 +273,19 @@ function Header() {
 
       <Dialog open={isLocationOpen} onClose={() => setIsLocationOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle className="flex items-center justify-between">
-          Choose location
+          Choose delivery address
           <IconButton onClick={() => setIsLocationOpen(false)} aria-label="Close location popup">
             <FaTimes />
           </IconButton>
         </DialogTitle>
         <DialogContent>
           {selectedLocation && <p className="mb-4 text-sm text-slate-500">Current: {selectedLocation}</p>}
+          {(savedAddressDetails.street || savedAddressDetails.zipCode) && (
+            <div className="mb-4 rounded-md border border-emerald-100 bg-emerald-50 p-3 text-sm text-slate-700">
+              {savedAddressDetails.street && <p className="mb-1"><strong>Street:</strong> {savedAddressDetails.street}</p>}
+              {savedAddressDetails.zipCode && <p><strong>PIN code:</strong> {savedAddressDetails.zipCode}</p>}
+            </div>
+          )}
           <form onSubmit={handleLocationSearch} className="flex gap-2">
             <TextField
               label="Search city, state, or country"
@@ -265,7 +306,7 @@ function Header() {
                 type="button"
                 key={`${location.name}-${location.state || ''}-${location.country}-${location.lat}-${location.lon}`}
                 className="rounded-md border border-slate-200 bg-slate-50 p-3 text-left text-sm transition hover:border-emerald-600"
-                onClick={() => saveLocation(location)}
+                onClick={() => saveLocationWithAddress(location)}
               >
                 <strong>{formatLocation(location)}</strong>
                 {location.lat && location.lon && (
