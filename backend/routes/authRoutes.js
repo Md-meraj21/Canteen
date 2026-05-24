@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { sendOtpEmail } = require('../utils/email');
+const { sendAdminNotification, sendOtpEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -125,6 +125,28 @@ router.post('/verify-registration-otp', async (req, res) => {
     user.emailOtpHash = null;
     user.emailOtpExpires = null;
     await user.save();
+
+    sendAdminNotification({
+      subject: `New user verification pending: ${user.name}`,
+      text: [
+        `${user.name} has verified their email and is waiting for admin approval.`,
+        `Email: ${user.email}`,
+        `Phone: ${user.phone}`,
+        `Military ID: ${user.militaryId || 'Not provided'}`,
+        `Rank: ${user.rank || 'Not provided'}`,
+      ].join('\n'),
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.5;color:#111827">
+          <h2>New user verification pending</h2>
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Phone:</strong> ${user.phone}</p>
+          <p><strong>Military ID:</strong> ${user.militaryId || 'Not provided'}</p>
+          <p><strong>Rank:</strong> ${user.rank || 'Not provided'}</p>
+          <p>Open the admin dashboard to approve or reject this account.</p>
+        </div>
+      `,
+    });
 
     res.json({
       message: 'Email verified. Your account is waiting for admin verification.',

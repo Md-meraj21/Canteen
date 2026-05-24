@@ -86,7 +86,7 @@ function Checkout() {
   if (!user) {
     return (
       <div className={`${page} grid min-h-[45vh] place-items-center`}>
-        <div className={`${panel} p-8 text-center`}>
+        <div className={`${panel} p-5 text-center sm:p-8`}>
           <h1 className="text-2xl font-bold text-slate-950">Login Required</h1>
           <p className="mt-2 text-slate-500">You need to log in before purchasing items.</p>
           <Button variant="contained" color="success" className="!mt-5" onClick={() => navigate('/login')}>
@@ -100,7 +100,7 @@ function Checkout() {
   if (items.length === 0) {
     return (
       <div className={`${page} grid min-h-[45vh] place-items-center`}>
-        <div className={`${panel} p-8 text-center`}>
+        <div className={`${panel} p-5 text-center sm:p-8`}>
           <h1 className="text-2xl font-bold text-slate-950">No items in cart</h1>
           <Button variant="contained" color="success" className="!mt-5" onClick={() => navigate('/')}>
             Return to Shopping
@@ -112,10 +112,10 @@ function Checkout() {
 
   return (
     <div className={page}>
-      <h1 className="text-3xl font-black text-slate-950">Checkout</h1>
+      <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">Checkout</h1>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <form onSubmit={handleSubmit} className={`${panel} grid gap-6 p-5`}>
+      <div className="mt-3 grid gap-3 sm:mt-6 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <form onSubmit={handleSubmit} className={`${panel} grid gap-4 p-4 sm:gap-6 sm:p-5`}>
           <section>
             <h2 className="text-xl font-bold text-slate-950">Shipping Address</h2>
             {savedLocation ? (
@@ -129,7 +129,7 @@ function Checkout() {
             ) : (
               <Alert severity="info" className="!mt-4">No saved location found. Enter address manually.</Alert>
             )}
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
               <TextField label="Street Address" name="street" value={formData.street} onChange={handleChange} required fullWidth className="sm:col-span-2" />
               <TextField label="City" name="city" value={formData.city} onChange={handleChange} required fullWidth />
               <TextField label="State" name="state" value={formData.state} onChange={handleChange} required fullWidth />
@@ -154,7 +154,7 @@ function Checkout() {
           </Button>
         </form>
 
-        <aside className={`${panel} h-max p-5`}>
+        <aside className={`${panel} h-max p-4 sm:p-5`}>
           <h2 className="text-xl font-bold text-slate-950">Order Summary</h2>
           <div className="mt-5 grid gap-3">
             {items.map((item) => (

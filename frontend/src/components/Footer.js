@@ -10,7 +10,7 @@ const sections = [
 
 function Footer() {
   return (
-    <footer className="mt-12 bg-slate-950 text-slate-200">
+    <footer className="mt-12 hidden bg-slate-950 text-slate-200 sm:block">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
         <div>
           <h4 className="text-lg font-bold text-white">ShopCart</h4>

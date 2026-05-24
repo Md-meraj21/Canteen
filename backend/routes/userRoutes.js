@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
+const { sendEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -97,6 +98,21 @@ router.put('/verify/:userId', authMiddleware, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+
+    sendEmail({
+      to: user.email,
+      subject: approved ? 'Your Canteen account has been verified' : 'Your Canteen verification was rejected',
+      text: approved
+        ? 'Your account has been verified. You can now log in and place orders.'
+        : `Your account verification was rejected.${verificationNotes ? ` Notes: ${verificationNotes}` : ''}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.5;color:#111827">
+          <h2>${approved ? 'Account verified' : 'Verification rejected'}</h2>
+          <p>${approved ? 'Your account has been verified. You can now log in and place orders.' : 'Your account verification was rejected.'}</p>
+          ${verificationNotes ? `<p><strong>Admin notes:</strong> ${verificationNotes}</p>` : ''}
+        </div>
+      `,
+    }).catch((error) => console.error(`User verification email failed: ${error.message}`));
 
     res.json({ message: 'User verification updated', user });
   } catch (error) {

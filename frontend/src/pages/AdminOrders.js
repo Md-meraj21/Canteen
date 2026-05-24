@@ -59,28 +59,28 @@ function AdminOrders() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Retailer Dashboard</p>
-          <h1 className="text-3xl font-black text-slate-950">All Orders</h1>
+          <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">All Orders</h1>
         </div>
         <Button variant="outlined" color="success" onClick={fetchAllOrders}>Refresh</Button>
       </div>
 
       {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-3 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-4 lg:grid-cols-4">
         {[
           ['Total Orders', stats.total],
           ['Pending', stats.pending],
           ['Confirmed', stats.confirmed],
           ['Delivered', stats.delivered],
         ].map(([label, value]) => (
-          <div key={label} className={`${panel} p-5`}>
+          <div key={label} className={`${panel} p-3 sm:p-5`}>
             <p className="text-sm text-slate-500">{label}</p>
-            <strong className="mt-2 block text-3xl text-slate-950">{value}</strong>
+            <strong className="mt-1 block text-xl text-slate-950 sm:mt-2 sm:text-3xl">{value}</strong>
           </div>
         ))}
       </section>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="no-scrollbar mt-3 overflow-x-auto sm:mt-6">
         <ToggleButtonGroup color="success" value={filter} exclusive onChange={(_, value) => value && setFilter(value)}>
           {filters.map((item) => (
             <ToggleButton key={item} value={item}>{item}</ToggleButton>
@@ -88,7 +88,7 @@ function AdminOrders() {
         </ToggleButtonGroup>
       </div>
 
-      <section className={`${panel} mt-6 overflow-hidden`}>
+      <section className={`${panel} mt-3 overflow-hidden sm:mt-6`}>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">

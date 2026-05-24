@@ -28,12 +28,12 @@ function VerificationPending() {
 
   return (
     <div className={`${page} grid place-items-center`}>
-      <section className={`${panel} w-full max-w-3xl p-6 sm:p-8`}>
+      <section className={`${panel} w-full max-w-3xl p-4 sm:p-8`}>
         <Chip label="Registration Successful" color="success" className="!font-bold" />
-        <h1 className="mt-4 text-3xl font-black text-slate-950">Your account is waiting for admin verification.</h1>
+        <h1 className="mt-4 text-2xl font-black text-slate-950 sm:text-3xl">Your account is waiting for admin verification.</h1>
         <p className="mt-2 text-slate-500">Email: <strong>{finalEmail}</strong></p>
 
-        <div className="mt-8">
+        <div className="mt-5 overflow-x-auto sm:mt-8">
           <Stepper activeStep={1} alternativeLabel>
             {['Account Created', 'Admin Verification', 'Ready to Login'].map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>
@@ -45,7 +45,7 @@ function VerificationPending() {
           The administrator is reviewing your ID card. This usually takes 24-48 hours.
         </Alert>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4">
           <div className="rounded-lg bg-slate-50 p-4">
             <h2 className="font-bold text-slate-950">What next?</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600">

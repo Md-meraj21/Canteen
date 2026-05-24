@@ -59,31 +59,31 @@ function Profile() {
 
   return (
     <div className={page}>
-      <h1 className="text-3xl font-black text-slate-950">My Profile</h1>
+      <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">My Profile</h1>
       {message && <Alert severity={message.includes('successfully') ? 'success' : 'error'} className="!mt-4">{message}</Alert>}
 
-      <section className={`${panel} mt-6 p-6`}>
+      <section className={`${panel} mt-3 p-4 sm:mt-6 sm:p-6`}>
         {!isEditing ? (
           <div className="grid gap-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
               {[
                 ['Name', user?.name],
                 ['Email', user?.email],
                 ['Phone', user?.phone],
                 ['Address', user?.address ? `${user.address.street}, ${user.address.city}, ${user.address.state} ${user.address.zipCode}` : 'Not added'],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-md bg-slate-50 p-4">
+                <div key={label} className="rounded-md bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
                   <p className="mt-1 font-semibold text-slate-950">{value || 'Not added'}</p>
                 </div>
               ))}
             </div>
-            <Button variant="contained" color="success" className="!w-max" onClick={() => setIsEditing(true)}>
+            <Button variant="contained" color="success" className="!w-full sm:!w-max" onClick={() => setIsEditing(true)}>
               Edit Profile
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             <TextField label="Name" name="name" value={formData.name || ''} onChange={handleChange} fullWidth />
             <TextField label="Email" name="email" value={formData.email || ''} onChange={handleChange} fullWidth />
             <TextField label="Phone" name="phone" value={formData.phone || ''} onChange={handleChange} fullWidth />

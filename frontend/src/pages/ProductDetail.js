@@ -145,26 +145,26 @@ function ProductDetail() {
 
   return (
     <div className={page}>
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
+      <section className="grid gap-3 sm:gap-6 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
         <div className={`${panel} overflow-hidden`}>
           <img src={images[0]} alt={product.name} className="aspect-square w-full bg-slate-100 object-cover" />
-          <div className="flex gap-2 overflow-x-auto p-3">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto p-2 sm:p-3">
             {images.map((image, index) => (
-              <img key={`${image}-${index}`} src={image} alt={`View ${index + 1}`} className="h-20 w-20 rounded-md border border-slate-200 object-cover" />
+              <img key={`${image}-${index}`} src={image} alt={`View ${index + 1}`} className="h-14 w-14 shrink-0 rounded-md border border-slate-200 object-cover sm:h-20 sm:w-20" />
             ))}
           </div>
         </div>
 
-        <div className={`${panel} p-5`}>
+        <div className={`${panel} p-3 sm:p-5`}>
           <Chip label={product.category || 'Product'} color="success" variant="outlined" />
-          <h1 className="mt-4 text-3xl font-black text-slate-950">{product.name}</h1>
+          <h1 className="mt-3 text-xl font-black text-slate-950 sm:mt-4 sm:text-3xl">{product.name}</h1>
           <div className="mt-3 flex items-center gap-2">
             <Rating value={averageRating} precision={0.5} readOnly />
             <span className="text-sm text-slate-500">{averageRating.toFixed(1)} ({reviews.length || product.numberOfReviews || 0} reviews)</span>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <span className="text-3xl font-black text-slate-950">{money(product.price)}</span>
+          <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-5 sm:gap-3">
+            <span className="text-2xl font-black text-slate-950 sm:text-3xl">{money(product.price)}</span>
             {product.originalPrice && <span className="text-lg text-slate-400 line-through">{money(product.originalPrice)}</span>}
             {product.discount > 0 && <Chip label={`${product.discount}% OFF`} color="success" />}
           </div>
@@ -173,12 +173,12 @@ function ProductDetail() {
             {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
           </p>
 
-          <Divider className="!my-5" />
+          <Divider className="!my-4 sm:!my-5" />
 
           <h2 className="text-lg font-bold text-slate-950">About this item</h2>
           <p className="mt-2 text-slate-600">{product.description}</p>
 
-          <div className="mt-5 grid gap-2 rounded-lg bg-slate-50 p-4 text-sm">
+          <div className="mt-4 grid gap-2 rounded-lg bg-slate-50 p-3 text-sm sm:mt-5 sm:p-4">
             <h3 className="font-bold text-slate-950">Specifications</h3>
             {product.specifications && Object.keys(product.specifications).length > 0 ? (
               Object.entries(product.specifications)
@@ -194,13 +194,13 @@ function ProductDetail() {
             )}
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:gap-3">
             <div className="flex items-center rounded-md border border-slate-200">
               <IconButton onClick={() => setQuantity(Math.max(1, quantity - 1))}><FaMinus className="text-xs" /></IconButton>
               <span className="min-w-10 text-center font-bold">{quantity}</span>
               <IconButton onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}><FaPlus className="text-xs" /></IconButton>
             </div>
-            <Button variant="contained" color="success" startIcon={<FaShoppingCart />} onClick={handleAddToCart} disabled={product.stock === 0}>
+            <Button variant="contained" color="success" startIcon={<FaShoppingCart />} onClick={handleAddToCart} disabled={product.stock === 0} className="!min-w-0">
               {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </Button>
             <Button
@@ -208,6 +208,7 @@ function ProductDetail() {
               color="error"
               startIcon={isWishlisted ? <FaHeart /> : <FaRegHeart />}
               onClick={() => toggleWishlist(product)}
+              className="col-span-2 sm:col-span-1"
             >
               {isWishlisted ? 'Remove Wishlist' : 'Add Wishlist'}
             </Button>
@@ -218,8 +219,8 @@ function ProductDetail() {
         </div>
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className={`${panel} p-5`}>
+      <section className="mt-3 grid gap-3 sm:mt-6 sm:gap-6 lg:grid-cols-2">
+        <div className={`${panel} p-3 sm:p-5`}>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-950">Ratings & Reviews</h2>
             <Chip label={`${reviews.length} reviews`} />
@@ -247,7 +248,7 @@ function ProductDetail() {
           </div>
         </div>
 
-        <div className={`${panel} p-5`}>
+        <div className={`${panel} p-3 sm:p-5`}>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-950">Product Q&A</h2>
             <Chip label={`${questions.length} questions`} />

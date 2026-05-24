@@ -53,16 +53,16 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="grid min-h-[70vh] place-items-center px-4 py-10">
-      <section className={`${panel} w-full max-w-md p-6`}>
-        <h1 className="text-3xl font-black text-slate-950">Reset password</h1>
+    <div className="grid min-h-[70vh] place-items-center px-2 py-4 sm:px-4 sm:py-10">
+      <section className={`${panel} w-full max-w-md p-5 sm:p-6`}>
+        <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">Reset password</h1>
         <p className="mt-2 text-sm text-slate-500">We will send an OTP to your registered email.</p>
 
         {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
         {message && <Alert severity="success" className="!mt-5">{message}</Alert>}
 
         {!otpSent ? (
-          <form onSubmit={requestOtp} className="mt-6 grid gap-4">
+          <form onSubmit={requestOtp} className="mt-5 grid gap-3 sm:mt-6 sm:gap-4">
             <TextField
               label="Registered Email"
               type="email"
@@ -76,7 +76,7 @@ function ForgotPassword() {
             </Button>
           </form>
         ) : (
-          <form onSubmit={resetPassword} className="mt-6 grid gap-4">
+          <form onSubmit={resetPassword} className="mt-5 grid gap-3 sm:mt-6 sm:gap-4">
             <TextField
               label="Email OTP"
               value={otp}

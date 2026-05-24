@@ -45,14 +45,14 @@ function Login() {
   };
 
   return (
-    <div className="grid min-h-[70vh] place-items-center px-4 py-10">
-      <section className={`${panel} w-full max-w-md p-6`}>
-        <h1 className="text-3xl font-black text-slate-950">Login</h1>
+    <div className="grid min-h-[70vh] place-items-center px-2 py-4 sm:px-4 sm:py-10">
+      <section className={`${panel} w-full max-w-md p-5 sm:p-6`}>
+        <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">Login</h1>
         <p className="mt-2 text-sm text-slate-500">Access your account, orders, and saved products.</p>
 
         {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
 
-        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+        <form onSubmit={handleSubmit} className="mt-5 grid gap-3 sm:mt-6 sm:gap-4">
           <TextField
             label="Username or Email"
             name="identifier"

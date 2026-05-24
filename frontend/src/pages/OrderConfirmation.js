@@ -11,7 +11,7 @@ function OrderConfirmation() {
   if (!order) {
     return (
       <div className={`${page} grid min-h-[45vh] place-items-center`}>
-        <div className={`${panel} p-8 text-center`}>
+        <div className={`${panel} p-5 text-center sm:p-8`}>
           <h1 className="text-2xl font-bold text-slate-950">No order found</h1>
           <Button variant="contained" color="success" className="!mt-5" onClick={() => navigate('/')}>
             Return to Home
@@ -23,12 +23,12 @@ function OrderConfirmation() {
 
   return (
     <div className={`${page} grid place-items-center`}>
-      <section className={`${panel} w-full max-w-2xl p-6 sm:p-8`}>
+      <section className={`${panel} w-full max-w-2xl p-4 sm:p-8`}>
         <Chip label="Order Confirmed" color="success" className="!font-bold" />
-        <h1 className="mt-4 text-3xl font-black text-slate-950">Thank you for your order.</h1>
+        <h1 className="mt-4 text-2xl font-black text-slate-950 sm:text-3xl">Thank you for your order.</h1>
         <p className="mt-2 text-slate-500">We have received your order and will process it shortly.</p>
 
-        <div className="mt-6 grid gap-3 rounded-lg bg-slate-50 p-4">
+        <div className="mt-5 grid gap-3 rounded-lg bg-slate-50 p-3 text-sm sm:mt-6 sm:p-4 sm:text-base">
           <div className="flex justify-between gap-4"><span>Order Number</span><strong>{order.orderNumber}</strong></div>
           <div className="flex justify-between gap-4"><span>Total Amount</span><strong>{money(order.totalAmount)}</strong></div>
           <div className="flex justify-between gap-4"><span>Payment Method</span><strong>{order.paymentMethod}</strong></div>

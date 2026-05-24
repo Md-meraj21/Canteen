@@ -47,12 +47,12 @@ function VerificationDashboard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Military Verification</p>
-          <h1 className="text-3xl font-black text-slate-950">User Verification Dashboard</h1>
+          <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">User Verification Dashboard</h1>
         </div>
         <Button variant="outlined" color="success" onClick={fetchPendingUsers}>Refresh</Button>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="no-scrollbar mt-3 overflow-x-auto sm:mt-6">
         <ToggleButtonGroup color="success" value={filter} exclusive onChange={(_, value) => value && setFilter(value)}>
           <ToggleButton value="pending">Pending</ToggleButton>
           <ToggleButton value="verified">Verified</ToggleButton>
@@ -65,11 +65,11 @@ function VerificationDashboard() {
       {loading ? (
         <div className="grid min-h-[30vh] place-items-center"><CircularProgress color="success" /></div>
       ) : users.length === 0 ? (
-        <div className={`${panel} mt-6 p-8 text-center text-slate-500`}>No users found.</div>
+        <div className={`${panel} mt-3 p-5 text-center text-slate-500 sm:mt-6 sm:p-8`}>No users found.</div>
       ) : (
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:mt-6 sm:gap-5 lg:grid-cols-2">
           {users.map((user) => (
-            <article key={user._id} className={`${panel} p-5`}>
+            <article key={user._id} className={`${panel} p-4 sm:p-5`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-slate-950">{user.name}</h2>

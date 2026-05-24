@@ -12,7 +12,7 @@ function Cart() {
   if (items.length === 0) {
     return (
       <div className={`${page} grid min-h-[50vh] place-items-center`}>
-        <div className={`${panel} max-w-md p-8 text-center`}>
+        <div className={`${panel} max-w-md p-5 text-center sm:p-8`}>
           <h1 className="text-2xl font-bold text-slate-950">Your cart is empty</h1>
           <p className="mt-2 text-slate-500">Add products to your cart before checkout.</p>
           <Button component={Link} to="/" variant="contained" color="success" className="!mt-6">
@@ -25,16 +25,16 @@ function Cart() {
 
   return (
     <div className={page}>
-      <h1 className="text-3xl font-black text-slate-950">Shopping Cart</h1>
+      <h1 className="text-2xl font-black text-slate-950 sm:text-3xl">Shopping Cart</h1>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="grid gap-4">
+      <div className="mt-3 grid gap-3 sm:mt-6 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="grid gap-3 sm:gap-4">
           {items.map((item) => (
-            <article key={item.product._id} className={`${panel} grid gap-4 p-4 sm:grid-cols-[96px_minmax(0,1fr)_auto] sm:items-center`}>
+            <article key={item.product._id} className={`${panel} grid grid-cols-[72px_minmax(0,1fr)] gap-3 p-3 sm:grid-cols-[96px_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4`}>
               <img
                 src={item.product.images?.[0]}
                 alt={item.product.name}
-                className="h-24 w-24 rounded-md bg-slate-100 object-cover"
+                className="h-[72px] w-[72px] rounded-md bg-slate-100 object-cover sm:h-24 sm:w-24"
               />
               <div className="min-w-0">
                 <h2 className="font-bold text-slate-950">{item.product.name}</h2>
@@ -49,7 +49,7 @@ function Cart() {
                   </IconButton>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-4 sm:block sm:text-right">
+              <div className="col-span-2 flex items-center justify-between gap-4 sm:col-span-1 sm:block sm:text-right">
                 <p className="text-lg font-black text-slate-950">{money(item.product.price * item.quantity)}</p>
                 <Button
                   color="error"
@@ -65,7 +65,7 @@ function Cart() {
           ))}
         </section>
 
-        <aside className={`${panel} h-max p-5`}>
+        <aside className={`${panel} h-max p-4 sm:p-5`}>
           <h2 className="text-xl font-bold text-slate-950">Order Summary</h2>
           <div className="mt-5 space-y-3 text-sm">
             <div className="flex justify-between"><span>Subtotal</span><strong>{money(totalPrice)}</strong></div>

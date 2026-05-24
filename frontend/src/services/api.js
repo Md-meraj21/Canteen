@@ -86,6 +86,13 @@ export const categoriesAPI = {
   delete: (id) => api.delete(`/categories/${id}`),
 };
 
+export const heroSlidesAPI = {
+  getAll: (params) => api.get('/hero-slides', { params }),
+  create: (data) => api.post('/hero-slides', data),
+  update: (id, data) => api.put(`/hero-slides/${id}`, data),
+  delete: (id) => api.delete(`/hero-slides/${id}`),
+};
+
 // Cart API
 export const cartAPI = {
   get: () => api.get('/cart'),

@@ -1,8 +1,8 @@
 export const money = (value) => `Rs ${Number(value || 0).toFixed(2)}`;
 
-export const page = 'mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8';
+export const page = 'app-page mx-auto w-full max-w-7xl px-2 py-3 sm:px-6 sm:py-6 lg:px-8';
 
-export const panel = 'rounded-lg border border-slate-200 bg-white shadow-sm';
+export const panel = 'app-panel rounded-lg border border-slate-200 bg-white shadow-sm';
 
 export const fieldClass =
   'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100';

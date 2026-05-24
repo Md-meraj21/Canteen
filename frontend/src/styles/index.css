@@ -23,3 +23,78 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  body {
+    background: #eef2f7;
+    overscroll-behavior-y: contain;
+  }
+
+  .app-page {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+  }
+
+  .app-panel {
+    border-color: #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+  }
+
+  .app-page h1 {
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .app-page h2 {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  .app-page section,
+  .app-page article,
+  .app-page form {
+    scroll-margin-top: 145px;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font-size: 16px;
+  }
+
+  .MuiPaper-root {
+    border-radius: 10px !important;
+  }
+
+  .MuiTextField-root .MuiInputBase-root,
+  .MuiFormControl-root .MuiInputBase-root {
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .MuiButton-root {
+    border-radius: 8px !important;
+    min-height: 34px;
+    text-transform: none !important;
+  }
+
+  .MuiDialog-paper {
+    margin: 10px !important;
+    width: calc(100% - 20px) !important;
+  }
+
+  table {
+    font-size: 12px;
+  }
+}

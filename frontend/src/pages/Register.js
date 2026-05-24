@@ -119,17 +119,17 @@ function Register() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
-      <section className={`${panel} p-6 sm:p-8`}>
+    <div className="app-page mx-auto w-full max-w-3xl px-2 py-3 sm:px-4 sm:py-10">
+      <section className={`${panel} p-4 sm:p-8`}>
         <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Defence personnel</p>
-        <h1 className="mt-1 text-3xl font-black text-slate-950">Military Registration</h1>
+        <h1 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">Military Registration</h1>
         <p className="mt-2 text-sm text-slate-500">Your account will be reviewed before shopping access is enabled.</p>
 
         {error && <Alert severity="error" className="!mt-5">{error}</Alert>}
         {message && <Alert severity="success" className="!mt-5">{message}</Alert>}
 
         {!otpSent ? (
-        <form onSubmit={handleSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4">
           <TextField label="Full Name" name="name" value={formData.name} onChange={handleChange} required fullWidth />
           <TextField
             label="Unique Username"
