@@ -10,13 +10,42 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://canteen-p87ob8vja-md-meraj21s-projects.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === 'https:' && (
+      hostname === 'vercel.app' ||
+      hostname.endsWith('.vercel.app') ||
+      hostname.endsWith('.onrender.com')
+    );
+  } catch (error) {
+    return false;
+  }
+};
+
 // Middleware
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '100mb' }));
