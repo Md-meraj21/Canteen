@@ -4,10 +4,6 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/geo/search",
-      "destination": "https://nominatim.openstreetmap.org/search"
-    },
-    {
       "source": "/api/(.*)",
       "destination": "https://shopcart-tbik.onrender.com/api/$1"
     },

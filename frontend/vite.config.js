@@ -31,11 +31,6 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": "http://localhost:5000",
-      "/geo": {
-        target: "https://nominatim.openstreetmap.org",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/geo/, ""),
-      },
     },
   },
 });

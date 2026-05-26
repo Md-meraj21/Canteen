@@ -39,41 +39,23 @@ export const productsAPI = {
 };
 
 export const locationAPI = {
-  search: async (query) => {
+  search: (query) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const apiUrl = import.meta.env.VITE_OPENWEATHER_GEO_API_URL;
-
-    if (apiKey && apiUrl) {
-      try {
-        return await axios.get(apiUrl, {
-          params: {
-            q: query,
-            limit: 5,
-            appid: apiKey,
-          },
-        });
-      } catch {
-        // Fall through to the Vercel proxy-backed map search below.
-      }
+    if (!apiKey) {
+      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
+    }
+    if (!apiUrl) {
+      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
     }
 
-    return axios.get('/geo/search', {
+    return axios.get(apiUrl, {
       params: {
-        format: 'jsonv2',
         q: query,
         limit: 5,
-        addressdetails: 1,
+        appid: apiKey,
       },
-    }).then((response) => ({
-      ...response,
-      data: response.data.map((item) => ({
-        name: item.name || item.display_name?.split(',')[0] || '',
-        state: item.address?.state || item.address?.county || '',
-        country: item.address?.country || '',
-        lat: item.lat,
-        lon: item.lon,
-      })),
-    }));
+    });
   },
   reverse: async (lat, lon) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
