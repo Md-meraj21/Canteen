@@ -84,7 +84,6 @@ router.post('/register', async (req, res) => {
     user.verificationStatus = 'email_unverified';
     user.emailOtpHash = hashOtp(otp);
     user.emailOtpExpires = otpExpiry();
-    await user.save();
 
     await sendOtpEmail({
       to: normalizedEmail,
@@ -92,6 +91,8 @@ router.post('/register', async (req, res) => {
       otp,
       purpose: 'registration'
     });
+
+    await user.save();
 
     res.status(201).json({
       message: 'OTP sent to your email. Verify it to submit your account for admin approval.',

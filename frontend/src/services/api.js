@@ -39,41 +39,73 @@ export const productsAPI = {
 };
 
 export const locationAPI = {
-  search: (query) => {
+  search: async (query) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const apiUrl = import.meta.env.VITE_OPENWEATHER_GEO_API_URL;
-    if (!apiKey) {
-      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
-    }
-    if (!apiUrl) {
-      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
+
+    if (apiKey && apiUrl) {
+      try {
+        return await axios.get(apiUrl, {
+          params: {
+            q: query,
+            limit: 5,
+            appid: apiKey,
+          },
+        });
+      } catch {
+        // Fall through to the Vercel proxy-backed map search below.
+      }
     }
 
-    return axios.get(apiUrl, {
+    return axios.get('/geo/search', {
       params: {
+        format: 'jsonv2',
         q: query,
         limit: 5,
-        appid: apiKey,
+        addressdetails: 1,
       },
-    });
+    }).then((response) => ({
+      ...response,
+      data: response.data.map((item) => ({
+        name: item.name || item.display_name?.split(',')[0] || '',
+        state: item.address?.state || item.address?.county || '',
+        country: item.address?.country || '',
+        lat: item.lat,
+        lon: item.lon,
+      })),
+    }));
   },
-  reverse: (lat, lon) => {
+  reverse: async (lat, lon) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const apiUrl = import.meta.env.VITE_OPENWEATHER_REVERSE_GEO_API_URL;
-    if (!apiKey) {
-      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
-    }
-    if (!apiUrl) {
-      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
+
+    if (apiKey && apiUrl) {
+      try {
+        return await axios.get(apiUrl, {
+          params: {
+            lat,
+            lon,
+            limit: 1,
+            appid: apiKey,
+          },
+        });
+      } catch {
+        // Fall through to the backend reverse-address endpoint below.
+      }
     }
 
-    return axios.get(apiUrl, {
-      params: {
-        lat,
-        lon,
-        limit: 1,
-        appid: apiKey,
-      },
+    return api.get('/location/reverse-address', { params: { lat, lon } }).then((response) => {
+      const address = response.data.address || {};
+      return {
+        ...response,
+        data: [{
+          name: address.city || address.town || address.village || address.county || response.data.name || '',
+          state: address.state || '',
+          country: address.country || '',
+          lat,
+          lon,
+        }],
+      };
     });
   },
   reverseAddress: (lat, lon) => api.get('/location/reverse-address', { params: { lat, lon } }),

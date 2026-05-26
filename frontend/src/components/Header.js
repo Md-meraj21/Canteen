@@ -147,16 +147,19 @@ function Header() {
           const firstLocation = locationResponse.status === 'fulfilled' && Array.isArray(locationResponse.value.data)
             ? locationResponse.value.data[0]
             : null;
-          if (firstLocation) saveLocation(firstLocation, addressResponse.status === 'fulfilled' ? addressResponse.value.data : {});
+          const addressData = addressResponse.status === 'fulfilled' ? addressResponse.value.data : {};
+          const address = addressData.address || {};
+          const fallbackLocation = addressData.address ? {
+            name: address.city || address.town || address.village || address.county || addressData.name || '',
+            state: address.state || '',
+            country: address.country || '',
+            lat: latitude,
+            lon: longitude,
+          } : null;
+          if (firstLocation || fallbackLocation) saveLocation(firstLocation || fallbackLocation, addressData);
           else setLocationMessage('Unable to read live location');
         } catch (error) {
-          setLocationMessage(
-            error.message === 'OPENWEATHER_KEY_MISSING'
-              ? 'Add OpenWeather API key'
-              : error.message === 'OPENWEATHER_URL_MISSING'
-                ? 'Add OpenWeather API URL'
-                : 'Live location failed'
-          );
+          setLocationMessage('Live location failed');
         } finally {
           setIsLocating(false);
         }
