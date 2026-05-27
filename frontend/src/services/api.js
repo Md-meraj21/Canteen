@@ -49,22 +49,7 @@ export const productsAPI = {
 };
 
 export const locationAPI = {
-  search: (query) => {
-    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-    const apiUrl = import.meta.env.VITE_OPENWEATHER_GEO_API_URL;
-
-    if (!apiKey || !apiUrl) {
-      return api.get('/location/search', { params: { q: query } });
-    }
-
-    return axios.get(apiUrl, {
-      params: {
-        q: query,
-        limit: 5,
-        appid: apiKey,
-      },
-    });
-  },
+  search: (query) => api.get('/location/search', { params: { q: query } }),
   reverse: async (lat, lon) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const apiUrl = import.meta.env.VITE_OPENWEATHER_REVERSE_GEO_API_URL;
