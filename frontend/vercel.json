@@ -1,12 +1,15 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/backend/(.*)",
-      "destination": "https://shopcart-tbik.onrender.com/api/$1"
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/backend/(.*)$",
+      "dest": "https://shopcart-tbik.onrender.com/api/$1"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/index.html"
     }
   ]
 }
