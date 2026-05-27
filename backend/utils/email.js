@@ -11,10 +11,19 @@ const createTransporter = () => {
     host: SMTP_HOST,
     port: Number(SMTP_PORT),
     secure: Number(SMTP_PORT) === 465,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
+  });
+};
+
+const sendOtpEmailInBackground = ({ to, subject, otp, purpose }) => {
+  sendOtpEmail({ to, subject, otp, purpose }).catch((error) => {
+    console.error(`OTP email failed for ${to}: ${error.message}`);
   });
 };
 
@@ -66,4 +75,4 @@ const sendAdminNotification = async ({ subject, text, html }) => {
   }
 };
 
-module.exports = { sendOtpEmail, sendEmail, sendAdminNotification };
+module.exports = { sendOtpEmail, sendOtpEmailInBackground, sendEmail, sendAdminNotification };

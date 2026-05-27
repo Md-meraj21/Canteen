@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { sendAdminNotification, sendOtpEmail } = require('../utils/email');
+const { sendAdminNotification, sendOtpEmail, sendOtpEmailInBackground } = require('../utils/email');
 
 const router = express.Router();
 
@@ -85,14 +85,14 @@ router.post('/register', async (req, res) => {
     user.emailOtpHash = hashOtp(otp);
     user.emailOtpExpires = otpExpiry();
 
-    await sendOtpEmail({
+    await user.save();
+
+    sendOtpEmailInBackground({
       to: normalizedEmail,
       subject: 'Canteen registration OTP',
       otp,
       purpose: 'registration'
     });
-
-    await user.save();
 
     res.status(201).json({
       message: 'OTP sent to your email. Verify it to submit your account for admin approval.',
@@ -176,7 +176,7 @@ router.post('/resend-registration-otp', async (req, res) => {
     user.emailOtpExpires = otpExpiry();
     await user.save();
 
-    await sendOtpEmail({
+    sendOtpEmailInBackground({
       to: email,
       subject: 'Canteen registration OTP',
       otp,
