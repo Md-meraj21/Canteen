@@ -35,8 +35,8 @@ export const authAPI = {
   verifyRegistrationOtp: (data) => registrationApi.post('/verify-registration-api', data),
   resendRegistrationOtp: (email) => registrationApi.post('/resend-registration-api', { email }),
   login: (credentials) => api.post('/auth/login', credentials),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (data) => api.post('/auth/reset-password', data),
+  forgotPassword: (email) => registrationApi.post('/forgot-password-api', { email }),
+  resetPassword: (data) => registrationApi.post('/reset-password-api', data),
 };
 
 // Products API

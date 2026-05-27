@@ -16,6 +16,14 @@
       "dest": "/api/auth/resend-registration-otp.js"
     },
     {
+      "src": "^/forgot-password-api$",
+      "dest": "/api/auth/forgot-password.js"
+    },
+    {
+      "src": "^/reset-password-api$",
+      "dest": "/api/auth/reset-password.js"
+    },
+    {
       "src": "^/backend/location/search$",
       "dest": "/api/location/search.js"
     },
