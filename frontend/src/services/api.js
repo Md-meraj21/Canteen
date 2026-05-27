@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
-  || '/api';
+  || '/backend';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,20 +10,30 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
-api.interceptors.request.use((config) => {
+const registrationApi = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const addAuthToken = (config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+};
+
+// Add token to requests
+api.interceptors.request.use(addAuthToken);
+registrationApi.interceptors.request.use(addAuthToken);
 
 // Auth API
 export const authAPI = {
-  register: (userData) => api.post('/auth/register', userData),
-  verifyRegistrationOtp: (data) => api.post('/auth/verify-registration-otp', data),
-  resendRegistrationOtp: (email) => api.post('/auth/resend-registration-otp', { email }),
+  register: (userData) => registrationApi.post('/auth/register', userData),
+  verifyRegistrationOtp: (data) => registrationApi.post('/auth/verify-registration-otp', data),
+  resendRegistrationOtp: (email) => registrationApi.post('/auth/resend-registration-otp', { email }),
   login: (credentials) => api.post('/auth/login', credentials),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (data) => api.post('/auth/reset-password', data),

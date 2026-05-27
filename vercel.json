@@ -4,19 +4,7 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/api/auth/register",
-      "destination": "/api/auth/register"
-    },
-    {
-      "source": "/api/auth/verify-registration-otp",
-      "destination": "/api/auth/verify-registration-otp"
-    },
-    {
-      "source": "/api/auth/resend-registration-otp",
-      "destination": "/api/auth/resend-registration-otp"
-    },
-    {
-      "source": "/api/(.*)",
+      "source": "/backend/(.*)",
       "destination": "https://shopcart-tbik.onrender.com/api/$1"
     },
     {
