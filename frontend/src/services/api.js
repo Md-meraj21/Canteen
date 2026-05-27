@@ -11,7 +11,7 @@ const api = axios.create({
 });
 
 const registrationApi = axios.create({
-  baseURL: '/api',
+  baseURL: '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,9 +31,9 @@ registrationApi.interceptors.request.use(addAuthToken);
 
 // Auth API
 export const authAPI = {
-  register: (userData) => registrationApi.post('/auth/register', userData),
-  verifyRegistrationOtp: (data) => registrationApi.post('/auth/verify-registration-otp', data),
-  resendRegistrationOtp: (email) => registrationApi.post('/auth/resend-registration-otp', { email }),
+  register: (userData) => registrationApi.post('/register-api', userData),
+  verifyRegistrationOtp: (data) => registrationApi.post('/verify-registration-api', data),
+  resendRegistrationOtp: (email) => registrationApi.post('/resend-registration-api', { email }),
   login: (credentials) => api.post('/auth/login', credentials),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (data) => api.post('/auth/reset-password', data),

@@ -15,8 +15,16 @@
   ],
   "routes": [
     {
-      "src": "^/api/(.*)$",
-      "dest": "/api/$1"
+      "src": "^/register-api$",
+      "dest": "/api/auth/register"
+    },
+    {
+      "src": "^/verify-registration-api$",
+      "dest": "/api/auth/verify-registration-otp"
+    },
+    {
+      "src": "^/resend-registration-api$",
+      "dest": "/api/auth/resend-registration-otp"
     },
     {
       "src": "^/backend/(.*)$",
