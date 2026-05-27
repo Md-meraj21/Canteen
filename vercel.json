@@ -5,15 +5,15 @@
   "routes": [
     {
       "src": "^/register-api$",
-      "dest": "/api/auth/register"
+      "dest": "/api/auth/register.js"
     },
     {
       "src": "^/verify-registration-api$",
-      "dest": "/api/auth/verify-registration-otp"
+      "dest": "/api/auth/verify-registration-otp.js"
     },
     {
       "src": "^/resend-registration-api$",
-      "dest": "/api/auth/resend-registration-otp"
+      "dest": "/api/auth/resend-registration-otp.js"
     },
     {
       "src": "^/backend/(.*)$",
