@@ -16,6 +16,10 @@
       "dest": "/api/auth/resend-registration-otp.js"
     },
     {
+      "src": "^/backend/location/search$",
+      "dest": "/api/location/search.js"
+    },
+    {
       "src": "^/backend/(.*)$",
       "dest": "https://shopcart-tbik.onrender.com/api/$1"
     },

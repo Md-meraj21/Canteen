@@ -52,11 +52,9 @@ export const locationAPI = {
   search: (query) => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const apiUrl = import.meta.env.VITE_OPENWEATHER_GEO_API_URL;
-    if (!apiKey) {
-      return Promise.reject(new Error('OPENWEATHER_KEY_MISSING'));
-    }
-    if (!apiUrl) {
-      return Promise.reject(new Error('OPENWEATHER_URL_MISSING'));
+
+    if (!apiKey || !apiUrl) {
+      return api.get('/location/search', { params: { q: query } });
     }
 
     return axios.get(apiUrl, {
