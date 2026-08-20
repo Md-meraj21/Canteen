@@ -3,6 +3,12 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL
   || '/backend';
 
+const USE_BACKEND_AUTH_API = import.meta.env.VITE_USE_SERVERLESS_AUTH_API !== 'true';
+
+const authEndpoint = (backendPath, serverlessPath) => (
+  USE_BACKEND_AUTH_API ? backendPath : serverlessPath
+);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,7 +17,7 @@ const api = axios.create({
 });
 
 const registrationApi = axios.create({
-  baseURL: '',
+  baseURL: USE_BACKEND_AUTH_API ? API_BASE_URL : '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -25,18 +31,52 @@ const addAuthToken = (config) => {
   return config;
 };
 
+const normalizeApiError = (error) => {
+  const serverMessage = error.response?.data?.error || error.response?.data?.message;
+
+  if (serverMessage && /cors/i.test(serverMessage) && error.response?.data) {
+    error.response.data.error = 'Backend connection blocked. Add this frontend URL to backend CORS settings and redeploy Render.';
+  }
+
+  if (!error.response && (error.code === 'ERR_NETWORK' || /network/i.test(error.message || ''))) {
+    error.message = 'Backend is not reachable. Check Render service status, API URL, and CORS settings.';
+  }
+
+  return Promise.reject(error);
+};
+
 // Add token to requests
 api.interceptors.request.use(addAuthToken);
 registrationApi.interceptors.request.use(addAuthToken);
+api.interceptors.response.use((response) => response, normalizeApiError);
+registrationApi.interceptors.response.use((response) => response, normalizeApiError);
+
+export const getApiErrorMessage = (error, fallback = 'Request failed') => {
+  const serverMessage = error.response?.data?.error || error.response?.data?.message;
+
+  if (serverMessage) {
+    if (/cors/i.test(serverMessage)) {
+      return 'Backend connection blocked. Please check the deployed frontend URL in backend CORS settings.';
+    }
+
+    return serverMessage;
+  }
+
+  if (error.code === 'ERR_NETWORK' || /network/i.test(error.message || '')) {
+    return 'Backend is not reachable. Please check API URL, Render service status, and CORS settings.';
+  }
+
+  return error.message || fallback;
+};
 
 // Auth API
 export const authAPI = {
-  register: (userData) => registrationApi.post('/register-api', userData),
-  verifyRegistrationOtp: (data) => registrationApi.post('/verify-registration-api', data),
-  resendRegistrationOtp: (email) => registrationApi.post('/resend-registration-api', { email }),
+  register: (userData) => registrationApi.post(authEndpoint('/auth/register', '/register-api'), userData),
+  verifyRegistrationOtp: (data) => registrationApi.post(authEndpoint('/auth/verify-registration-otp', '/verify-registration-api'), data),
+  resendRegistrationOtp: (email) => registrationApi.post(authEndpoint('/auth/resend-registration-otp', '/resend-registration-api'), { email }),
   login: (credentials) => api.post('/auth/login', credentials),
-  forgotPassword: (email) => registrationApi.post('/forgot-password-api', { email }),
-  resetPassword: (data) => registrationApi.post('/reset-password-api', data),
+  forgotPassword: (email) => registrationApi.post(authEndpoint('/auth/forgot-password', '/forgot-password-api'), { email }),
+  resetPassword: (data) => registrationApi.post(authEndpoint('/auth/reset-password', '/reset-password-api'), data),
 };
 
 // Products API

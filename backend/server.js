@@ -8,25 +8,73 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
+const normalizeOrigin = (origin) => {
+  if (!origin) {
+    return '';
+  }
+
+  try {
+    const url = new URL(origin);
+    return `${url.protocol}//${url.host}`;
+  } catch (error) {
+    return origin.replace(/\/$/, '');
+  }
+};
+
+const parseOriginList = (...values) => values
+  .filter(Boolean)
+  .flatMap((value) => value.split(','))
+  .map((origin) => normalizeOrigin(origin.trim()))
+  .filter(Boolean);
+
+const allowedOrigins = new Set(parseOriginList(
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
   process.env.FRONTEND_URL,
-].filter(Boolean);
+  process.env.FRONTEND_URLS,
+  process.env.CORS_ORIGINS
+));
+
+const isPrivateNetworkHost = (hostname) => (
+  hostname === 'localhost'
+  || hostname === '0.0.0.0'
+  || hostname === '[::1]'
+  || hostname === '::1'
+  || hostname === '127.0.0.1'
+  || hostname.startsWith('127.')
+  || hostname.startsWith('10.')
+  || hostname.startsWith('192.168.')
+  || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+);
+
+const isDevelopmentOrigin = (origin) => {
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return ['http:', 'https:'].includes(protocol) && isPrivateNetworkHost(hostname);
+  } catch (error) {
+    return false;
+  }
+};
 
 const isAllowedOrigin = (origin) => {
   if (!origin) {
     return true;
   }
 
-  if (allowedOrigins.includes(origin)) {
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.has(normalizedOrigin) || isDevelopmentOrigin(normalizedOrigin)) {
     return true;
   }
 
   try {
-    const { hostname, protocol } = new URL(origin);
+    const { hostname, protocol } = new URL(normalizedOrigin);
     return protocol === 'https:' && (
       hostname === 'vercel.app' ||
       hostname.endsWith('.vercel.app') ||
@@ -44,9 +92,14 @@ app.use(cors({
       return callback(null, true);
     }
 
-    return callback(new Error('Not allowed by CORS'));
+    const error = new Error(`Origin ${origin} is not allowed by CORS`);
+    error.status = 403;
+    error.code = 'CORS_NOT_ALLOWED';
+    return callback(error);
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 204,
+  maxAge: 86400,
 }));
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
@@ -78,7 +131,12 @@ app.get('/api/health', (req, res) => {
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err);
+  if (err.code === 'CORS_NOT_ALLOWED') {
+    console.warn(err.message);
+  } else {
+    console.error(err);
+  }
+
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
   res.status(status).json({ error: message });
@@ -91,9 +149,12 @@ app.use((req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 module.exports = app;

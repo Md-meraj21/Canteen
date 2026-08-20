@@ -15,11 +15,11 @@ import {
 import { FaHeart, FaMapMarkerAlt, FaSearch, FaShoppingCart, FaTimes, FaUser } from 'react-icons/fa';
 import { locationAPI } from '../services/api';
 import { useAuthStore, useCartStore, useWishlistStore } from '../context/store';
-import logo from '../asests/logo.png';
+import logo from '../asests/icons8-fast-cart-100.png';
 
 const categories = ['Phones', 'Laptops', 'Electronics', 'Groceries', 'Home & Kitchen', 'Fashion', 'Books', 'Sports', 'Beauty'];
 
-function Header() {
+function Header({ onLoginClick }) {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { items } = useCartStore();
@@ -247,8 +247,8 @@ function Header() {
             </>
           ) : (
             <Button
-              component={Link}
-              to="/login"
+              type="button"
+              onClick={onLoginClick}
               size="small"
               variant="outlined"
               startIcon={<FaUser />}
