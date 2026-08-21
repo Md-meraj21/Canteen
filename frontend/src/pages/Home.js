@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button, Chip, Drawer, FormControl, InputLabel, MenuItem, Select, Skeleton } from '@mui/material';
 import ProductCard from '../components/ProductCard';
-import { productsAPI, categoriesAPI, heroSlidesAPI } from '../services/api';
+import { productsAPI, categoriesAPI, heroSlidesAPI, getApiErrorMessage } from '../services/api';
 import { page, panel } from '../utils/ui';
 
 const HERO_SLIDES = [
@@ -58,24 +58,28 @@ function Home() {
       try {
         const categoryParam = searchParams.get('category') || '';
         const searchParam = searchParams.get('search') || '';
-        const [productsRes, categoriesRes] = await Promise.all([
+        const [productsResult, categoriesResult, heroSlidesResult] = await Promise.allSettled([
           productsAPI.getAll({
             category: categoryParam && categoryParam !== 'All' ? categoryParam : undefined,
             search: searchParam || undefined,
           }),
           categoriesAPI.getAll(),
+          heroSlidesAPI.getAll(),
         ]);
-        setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
-        setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
 
-        try {
-          const heroSlidesRes = await heroSlidesAPI.getAll();
-          setHeroSlides(Array.isArray(heroSlidesRes.data) && heroSlidesRes.data.length ? heroSlidesRes.data : HERO_SLIDES);
-        } catch {
-          setHeroSlides(HERO_SLIDES);
+        if (productsResult.status === 'rejected') {
+          throw productsResult.reason;
         }
+
+        setProducts(Array.isArray(productsResult.value.data) ? productsResult.value.data : []);
+        setCategories(categoriesResult.status === 'fulfilled' && Array.isArray(categoriesResult.value.data) ? categoriesResult.value.data : []);
+
+        const loadedHeroSlides = heroSlidesResult.status === 'fulfilled' && Array.isArray(heroSlidesResult.value.data)
+          ? heroSlidesResult.value.data
+          : [];
+        setHeroSlides(loadedHeroSlides.length ? loadedHeroSlides : HERO_SLIDES);
       } catch (err) {
-        setError(err.response?.data?.error || 'Products are not loading. Please check the backend server.');
+        setError(getApiErrorMessage(err, 'Products are not loading. Please check the backend server.'));
       } finally {
         setLoading(false);
       }

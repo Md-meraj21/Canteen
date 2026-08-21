@@ -1,28 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import AuthModal from './components/AuthModal';
-import Home from './pages/Home';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import OrderConfirmation from './pages/OrderConfirmation';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Profile from './pages/Profile';
-import Orders from './pages/Orders';
-import VerificationPending from './pages/VerificationPending';
-import VerificationDashboard from './pages/VerificationDashboard';
-import AdminOrders from './pages/AdminOrders';
-import AdminDashboard from './pages/AdminDashboard';
-import Wishlist from './pages/Wishlist';
-import ForgotPassword from './pages/ForgotPassword';
 import { useAuthStore } from './context/store';
+
+const AuthModal = lazy(() => import('./components/AuthModal'));
+const Home = lazy(() => import('./pages/Home'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Orders = lazy(() => import('./pages/Orders'));
+const VerificationPending = lazy(() => import('./pages/VerificationPending'));
+const VerificationDashboard = lazy(() => import('./pages/VerificationDashboard'));
+const AdminOrders = lazy(() => import('./pages/AdminOrders'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 
 const AUTH_POPUP_DELAY_MS = 7000;
 const AUTH_POPUP_DISMISSED_KEY = 'authPopupDismissed';
 const quietAuthPaths = ['/login', '/register', '/forgot-password', '/verification-pending'];
+
+function RouteFallback() {
+  return (
+    <div className="grid min-h-[45vh] place-items-center px-4 text-sm font-semibold text-emerald-700">
+      Loading...
+    </div>
+  );
+}
 
 function AppShell() {
   const location = useLocation();
@@ -65,35 +74,41 @@ function AppShell() {
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <Header onLoginClick={() => openAuthModal('login')} />
       <main className="w-full flex-1">
-        <Routes>
-          {/* If user has pending registration and tries to go to register, show verification pending */}
-          <Route
-            path="/register"
-            element={pendingEmail ? <VerificationPending /> : <Register />}
-          />
-          <Route path="/" element={<Home />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/verification-pending" element={<VerificationPending />} />
-          <Route path="/admin/verification" element={<VerificationDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            {/* If user has pending registration and tries to go to register, show verification pending */}
+            <Route
+              path="/register"
+              element={pendingEmail ? <VerificationPending /> : <Register />}
+            />
+            <Route path="/" element={<Home />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verification-pending" element={<VerificationPending />} />
+            <Route path="/admin/verification" element={<VerificationDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
-      <AuthModal
-        open={authModalOpen && !user}
-        mode={authMode}
-        onModeChange={setAuthMode}
-        onClose={closeAuthModal}
-      />
+      {authModalOpen && !user && (
+        <Suspense fallback={null}>
+          <AuthModal
+            open
+            mode={authMode}
+            onModeChange={setAuthMode}
+            onClose={closeAuthModal}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

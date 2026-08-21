@@ -1,13 +1,15 @@
 const express = require('express');
 const HeroSlide = require('../models/HeroSlide');
 const { adminMiddleware } = require('../middleware/auth');
+const { setPublicCache } = require('../utils/cache');
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
     const filter = req.query.includeInactive === 'true' ? {} : { isActive: true };
-    const slides = await HeroSlide.find(filter).sort({ sortOrder: 1, createdAt: -1 });
+    const slides = await HeroSlide.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
+    setPublicCache(res, { maxAge: 60, edgeMaxAge: 300, staleWhileRevalidate: 600 });
     res.json(slides);
   } catch (error) {
     res.status(500).json({ error: error.message });
