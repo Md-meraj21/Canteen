@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const Review = require('../models/Review');
 const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
-const { setPublicCache } = require('../utils/cache');
 
 const router = express.Router();
 
@@ -12,10 +11,8 @@ router.get('/product/:productId', async (req, res) => {
   try {
     const reviews = await Review.find({ product: req.params.productId })
       .populate('user', 'name avatar')
-      .sort({ createdAt: -1 })
-      .lean();
+      .sort({ createdAt: -1 });
 
-    setPublicCache(res);
     res.json(reviews);
   } catch (error) {
     res.status(500).json({ error: error.message });

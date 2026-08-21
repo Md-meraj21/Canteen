@@ -1,13 +1,8 @@
 const express = require('express');
 const Product = require('../models/Product');
-const Question = require('../models/Question');
-const Review = require('../models/Review');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
-const { setPublicCache } = require('../utils/cache');
 
 const router = express.Router();
-
-const PRODUCT_LIST_FIELDS = 'name price originalPrice discount category images stock rating numberOfReviews createdAt';
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -32,42 +27,10 @@ router.get('/', async (req, res) => {
     }
 
     const products = await Product.find(filter)
-      .select(PRODUCT_LIST_FIELDS)
       .sort(sort === 'price-low' ? { price: 1 } : sort === 'price-high' ? { price: -1 } : { createdAt: -1 })
-      .populate('seller', 'name')
-      .lean();
+      .populate('seller', 'name');
 
-    setPublicCache(res);
     res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get product with reviews and questions in one request
-router.get('/:id/details', async (req, res) => {
-  try {
-    const [product, reviews, questions] = await Promise.all([
-      Product.findById(req.params.id)
-        .populate('seller', 'name email')
-        .lean(),
-      Review.find({ product: req.params.id })
-        .populate('user', 'name avatar')
-        .sort({ createdAt: -1 })
-        .lean(),
-      Question.find({ product: req.params.id })
-        .populate('user', 'name')
-        .populate('answeredBy', 'name')
-        .sort({ createdAt: -1 })
-        .lean(),
-    ]);
-
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    setPublicCache(res);
-    res.json({ product, reviews, questions });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -77,14 +40,12 @@ router.get('/:id/details', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate('seller', 'name email')
-      .lean();
+      .populate('seller', 'name email');
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    setPublicCache(res);
     res.json(product);
   } catch (error) {
     res.status(500).json({ error: error.message });

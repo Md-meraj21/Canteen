@@ -1,7 +1,6 @@
 const express = require('express');
 const Question = require('../models/Question');
 const { authMiddleware } = require('../middleware/auth');
-const { setPublicCache } = require('../utils/cache');
 
 const router = express.Router();
 
@@ -10,10 +9,8 @@ router.get('/product/:productId', async (req, res) => {
     const questions = await Question.find({ product: req.params.productId })
       .populate('user', 'name')
       .populate('answeredBy', 'name')
-      .sort({ createdAt: -1 })
-      .lean();
+      .sort({ createdAt: -1 });
 
-    setPublicCache(res);
     res.json(questions);
   } catch (error) {
     res.status(500).json({ error: error.message });

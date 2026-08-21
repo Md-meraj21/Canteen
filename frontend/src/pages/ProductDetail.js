@@ -39,25 +39,14 @@ function ProductDetail() {
     try {
       setLoading(true);
       setError('');
-      try {
-        const detailsRes = await productsAPI.getDetails(id);
-        setProduct(detailsRes.data?.product || null);
-        setReviews(Array.isArray(detailsRes.data?.reviews) ? detailsRes.data.reviews : []);
-        setQuestions(Array.isArray(detailsRes.data?.questions) ? detailsRes.data.questions : []);
-      } catch (detailsError) {
-        if (detailsError.response?.status !== 404) {
-          throw detailsError;
-        }
-
-        const [productRes, reviewsRes, questionsRes] = await Promise.all([
-          productsAPI.getById(id),
-          reviewsAPI.getByProduct(id),
-          questionsAPI.getByProduct(id),
-        ]);
-        setProduct(productRes.data || null);
-        setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
-        setQuestions(Array.isArray(questionsRes.data) ? questionsRes.data : []);
-      }
+      const [productRes, reviewsRes, questionsRes] = await Promise.all([
+        productsAPI.getById(id),
+        reviewsAPI.getByProduct(id),
+        questionsAPI.getByProduct(id),
+      ]);
+      setProduct(productRes.data || null);
+      setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
+      setQuestions(Array.isArray(questionsRes.data) ? questionsRes.data : []);
     } catch {
       setError('Failed to load product. Please try again.');
     } finally {

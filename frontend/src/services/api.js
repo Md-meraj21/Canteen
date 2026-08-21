@@ -11,7 +11,6 @@ const authEndpoint = (backendPath, serverlessPath) => (
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 75000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,7 +18,6 @@ const api = axios.create({
 
 const registrationApi = axios.create({
   baseURL: USE_BACKEND_AUTH_API ? API_BASE_URL : '',
-  timeout: 75000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -47,50 +45,14 @@ const normalizeApiError = (error) => {
   return Promise.reject(error);
 };
 
-const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
-
-const wait = (ms) => new Promise((resolve) => {
-  window.setTimeout(resolve, ms);
-});
-
-const shouldRetryRequest = (error) => {
-  const method = error.config?.method?.toLowerCase();
-  if (!['get', 'head', 'options'].includes(method)) {
-    return false;
-  }
-
-  const status = error.response?.status;
-  return !error.response
-    || error.code === 'ECONNABORTED'
-    || RETRYABLE_STATUSES.has(status);
-};
-
-const retryRequest = async (client, error) => {
-  const config = error.config || {};
-  config.__retryCount = config.__retryCount || 0;
-
-  if (config.__retryCount >= 2 || !shouldRetryRequest(error)) {
-    return normalizeApiError(error);
-  }
-
-  config.__retryCount += 1;
-  await wait(900 * config.__retryCount);
-  return client(config);
-};
-
 // Add token to requests
 api.interceptors.request.use(addAuthToken);
 registrationApi.interceptors.request.use(addAuthToken);
-api.interceptors.response.use((response) => response, (error) => retryRequest(api, error));
-registrationApi.interceptors.response.use((response) => response, (error) => retryRequest(registrationApi, error));
+api.interceptors.response.use((response) => response, normalizeApiError);
+registrationApi.interceptors.response.use((response) => response, normalizeApiError);
 
 export const getApiErrorMessage = (error, fallback = 'Request failed') => {
   const serverMessage = error.response?.data?.error || error.response?.data?.message;
-  const status = error.response?.status;
-
-  if ([502, 503, 504].includes(status)) {
-    return 'Backend is waking up or temporarily unavailable. Please refresh in a few seconds.';
-  }
 
   if (serverMessage) {
     if (/cors/i.test(serverMessage)) {
@@ -121,7 +83,6 @@ export const authAPI = {
 export const productsAPI = {
   getAll: (params) => api.get('/products', { params }),
   getById: (id) => api.get(`/products/${id}`),
-  getDetails: (id) => api.get(`/products/${id}/details`),
   create: (data) => api.post('/products', data),
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),

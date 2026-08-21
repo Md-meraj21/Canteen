@@ -1,7 +1,6 @@
 const express = require('express');
 const Category = require('../models/Category');
 const { authMiddleware: protect, adminMiddleware: admin } = require('../middleware/auth');
-const { setPublicCache } = require('../utils/cache');
 
 const router = express.Router();
 
@@ -10,8 +9,7 @@ const router = express.Router();
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const categories = await Category.find({}).sort({ name: 1 }).lean();
-    setPublicCache(res, { maxAge: 60, edgeMaxAge: 300, staleWhileRevalidate: 600 });
+    const categories = await Category.find({});
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
