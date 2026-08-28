@@ -46,6 +46,7 @@ module.exports = async (req, res) => {
 
     return json(res, 200, {
       message: 'Email verified. Your account is waiting for admin verification.',
+      nextPath: '/verification-pending',
       user: {
         id: user._id,
         name: user.name,

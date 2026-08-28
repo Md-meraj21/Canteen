@@ -151,6 +151,7 @@ router.post('/verify-registration-otp', async (req, res) => {
 
     res.json({
       message: 'Email verified. Your account is waiting for admin verification.',
+      nextPath: '/verification-pending',
       user: publicUser(user)
     });
   } catch (error) {

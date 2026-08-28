@@ -5,7 +5,25 @@ const nodemailer = require('nodemailer');
 
 const OTP_TTL_MINUTES = 10;
 
-let cachedClient;
+const globalMongoCache = globalThis.__canteenMongoCache || {
+  client: null,
+  promise: null,
+};
+
+globalThis.__canteenMongoCache = globalMongoCache;
+
+const numberFromEnv = (name, fallback) => {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+};
+
+const mongoOptions = () => ({
+  maxPoolSize: numberFromEnv('MONGODB_MAX_POOL_SIZE', 5),
+  minPoolSize: numberFromEnv('MONGODB_MIN_POOL_SIZE', 0),
+  serverSelectionTimeoutMS: numberFromEnv('MONGODB_SERVER_SELECTION_TIMEOUT_MS', 10000),
+  connectTimeoutMS: numberFromEnv('MONGODB_CONNECT_TIMEOUT_MS', 10000),
+  socketTimeoutMS: numberFromEnv('MONGODB_SOCKET_TIMEOUT_MS', 45000),
+});
 
 const readBody = async (req) => {
   if (req.body && typeof req.body === 'object') {
@@ -26,12 +44,25 @@ const getDb = async () => {
     throw new Error('MONGODB_URI is not configured');
   }
 
-  if (!cachedClient) {
-    cachedClient = new MongoClient(process.env.MONGODB_URI);
-    await cachedClient.connect();
+  if (globalMongoCache.client) {
+    return globalMongoCache.client.db(process.env.MONGODB_DB_NAME);
   }
 
-  return cachedClient.db();
+  if (!globalMongoCache.promise) {
+    const client = new MongoClient(process.env.MONGODB_URI, mongoOptions());
+    globalMongoCache.promise = client.connect()
+      .then((connectedClient) => {
+        globalMongoCache.client = connectedClient;
+        return connectedClient;
+      })
+      .catch((error) => {
+        globalMongoCache.promise = null;
+        throw error;
+      });
+  }
+
+  const client = await globalMongoCache.promise;
+  return client.db(process.env.MONGODB_DB_NAME);
 };
 
 const createOtp = () => String(crypto.randomInt(100000, 1000000));

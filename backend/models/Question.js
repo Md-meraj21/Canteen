@@ -34,4 +34,6 @@ const questionSchema = new mongoose.Schema({
   }
 });
 
+questionSchema.index({ product: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Question', questionSchema);

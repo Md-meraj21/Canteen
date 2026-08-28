@@ -32,6 +32,7 @@ const allowedOrigins = new Set(parseOriginList(
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
+  'https://canteen-swart.vercel.app',
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URLS,
   process.env.CORS_ORIGINS
@@ -73,16 +74,7 @@ const isAllowedOrigin = (origin) => {
     return true;
   }
 
-  try {
-    const { hostname, protocol } = new URL(normalizedOrigin);
-    return protocol === 'https:' && (
-      hostname === 'vercel.app' ||
-      hostname.endsWith('.vercel.app') ||
-      hostname.endsWith('.onrender.com')
-    );
-  } catch (error) {
-    return false;
-  }
+  return false;
 };
 
 // Middleware
@@ -106,7 +98,6 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Database Connection
 const connectDB = require('./config/database');
-connectDB();
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -131,14 +122,20 @@ app.get('/api/health', (req, res) => {
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON request body' });
+  }
+
   if (err.code === 'CORS_NOT_ALLOWED') {
     console.warn(err.message);
   } else {
-    console.error(err);
+    console.error(err.message || 'Unhandled server error');
   }
 
   const status = err.status || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = status >= 500 && process.env.NODE_ENV === 'production'
+    ? 'Internal Server Error'
+    : err.message || 'Internal Server Error';
   res.status(status).json({ error: message });
 });
 
@@ -151,9 +148,26 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  connectDB().then(() => {
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Stop the existing process or set PORT to another value.`);
+      } else {
+        console.error(`Server failed to start: ${error.message}`);
+      }
+      process.exit(1);
+    });
+  }).catch(() => {
+    process.exit(1);
+  });
+} else {
+  connectDB().catch((error) => {
+    console.error(`Database initialization failed: ${error.message}`);
   });
 }
 

@@ -20,9 +20,10 @@ function AuthModal({ open, mode, onModeChange, onClose }) {
   }[mode] || 'Login';
   const paperClassName = `auth-modal-paper ${isWide ? 'auth-modal-paper-register' : ''}`;
 
-  const showVerificationPending = (email) => {
+  const showVerificationPending = (email, nextPath = '/verification-pending') => {
     setPendingVerificationEmail(email);
-    onModeChange('verification');
+    onClose();
+    navigate(nextPath, { state: { email } });
   };
 
   const goHome = () => {

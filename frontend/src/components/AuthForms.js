@@ -141,6 +141,7 @@ export function LoginForm({ variant = 'page', onSuccess, onSwitchMode, onForgotP
 
 export function RegisterForm({ variant = 'page', onSwitchMode, onVerificationPending, onNavigateAway }) {
   const navigate = useNavigate();
+  const { setUser, setToken } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -214,16 +215,27 @@ export function RegisterForm({ variant = 'page', onSwitchMode, onVerificationPen
 
     try {
       const pendingEmail = verifiedEmail || formData.email;
-      await authAPI.verifyRegistrationOtp({
+      const response = await authAPI.verifyRegistrationOtp({
         email: pendingEmail,
         otp,
       });
+      const { user, token, nextPath } = response.data || {};
+
+      if (user && token) {
+        localStorage.removeItem('pendingRegistrationEmail');
+        setUser(user);
+        setToken(token);
+        onNavigateAway?.();
+        navigate(user.role === 'admin' ? '/admin' : '/');
+        return;
+      }
+
       localStorage.setItem('pendingRegistrationEmail', pendingEmail);
       if (onVerificationPending) {
-        onVerificationPending(pendingEmail);
+        onVerificationPending(pendingEmail, nextPath || '/verification-pending');
       } else {
         onNavigateAway?.();
-        navigate('/verification-pending', { state: { email: pendingEmail } });
+        navigate(nextPath || '/verification-pending', { state: { email: pendingEmail } });
       }
     } catch (err) {
       setError(getApiErrorMessage(err, 'OTP verification failed'));

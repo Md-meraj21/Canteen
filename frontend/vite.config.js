@@ -2,6 +2,10 @@ import { defineConfig, transformWithEsbuild } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+const backendProxyTarget = process.env.VITE_API_PROXY_TARGET
+  || process.env.BACKEND_URL
+  || "http://localhost:5000";
+
 const jsAsJsx = {
   name: "js-as-jsx",
   async transform(code, id) {
@@ -31,7 +35,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/backend": {
-        target: "http://localhost:5000",
+        target: backendProxyTarget,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/backend/, "/api"),
       },
