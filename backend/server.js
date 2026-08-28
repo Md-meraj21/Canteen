@@ -33,7 +33,6 @@ const allowedOrigins = new Set(parseOriginList(
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
   'https://canteen-swart.vercel.app',
-  'https://canteen-swart.vercel.app/',
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URLS,
   process.env.CORS_ORIGINS

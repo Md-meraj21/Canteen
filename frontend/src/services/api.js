@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
-  || '/backend' || "https://shopcart-tbik.onrender.com";
+  || '/backend';
 
 const USE_BACKEND_AUTH_API = import.meta.env.VITE_USE_SERVERLESS_AUTH_API !== 'true';
 
