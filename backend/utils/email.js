@@ -3,20 +3,35 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    throw new Error('Email service is not configured. Add SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS.');
+  if (!SMTP_USER || !SMTP_PASS) {
+    throw new Error('Email service is not configured. Add SMTP_USER and SMTP_PASS.');
   }
 
+  // Use nodemailer built-in 'gmail' service for Gmail to prevent ENETUNREACH IPv6 issues on Render
+  if (!SMTP_HOST || SMTP_HOST.includes('gmail')) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    });
+  }
+
+  const port = Number(SMTP_PORT) || 465;
   return nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: Number(SMTP_PORT) === 465,
+    port: port,
+    secure: port === 465,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   });
 };
