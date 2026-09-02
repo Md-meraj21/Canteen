@@ -81,25 +81,31 @@ const sendOtpEmail = async ({ to, subject, otp, purpose }) => {
     throw new Error('Email service is not configured');
   }
 
-  const host = SMTP_HOST || 'smtp.gmail.com';
-  const port = Number(SMTP_PORT) || 465;
+  const isGmail = !SMTP_HOST || SMTP_HOST.includes('gmail') || (SMTP_USER && SMTP_USER.includes('@gmail.com'));
 
-  const transporter = nodemailer.createTransport({
-    host: host,
-    port: port,
-    secure: port === 465,
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    dnsTimeout: 5000,
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
+  const transporter = isGmail
+    ? nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: SMTP_USER,
+          pass: SMTP_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      })
+    : nodemailer.createTransport({
+        host: SMTP_HOST || 'smtp.gmail.com',
+        port: Number(SMTP_PORT) || 465,
+        secure: Number(SMTP_PORT) === 465,
+        auth: {
+          user: SMTP_USER,
+          pass: SMTP_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM || SMTP_USER,
