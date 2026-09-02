@@ -1,7 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const dns = require('dns');
 require('express-async-errors');
+
+// Force IPv4 first to prevent IPv6 ENETUNREACH / hanging timeouts on cloud hosts like Render
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 // Load environment variables
 dotenv.config();
