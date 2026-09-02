@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL
   || '/backend';
 
-const USE_BACKEND_AUTH_API = import.meta.env.VITE_USE_SERVERLESS_AUTH_API !== 'true';
+const USE_BACKEND_AUTH_API = import.meta.env.VITE_USE_BACKEND_AUTH_API === 'true';
 
 const authEndpoint = (backendPath, serverlessPath) => (
   USE_BACKEND_AUTH_API ? backendPath : serverlessPath

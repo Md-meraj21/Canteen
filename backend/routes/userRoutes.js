@@ -55,7 +55,7 @@ router.post('/change-password', authMiddleware, async (req, res) => {
 router.get('/pending/:status', authMiddleware, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.email !== 'seller@shopkaro.com') {
+    if (req.user.role !== 'admin' && req.user.email !== 'seller@shopkaro.com') {
       return res.status(403).json({ error: 'Only admin can access this' });
     }
 
@@ -77,7 +77,7 @@ router.get('/pending/:status', authMiddleware, async (req, res) => {
 router.put('/verify/:userId', authMiddleware, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.email !== 'seller@shopkaro.com') {
+    if (req.user.role !== 'admin' && req.user.email !== 'seller@shopkaro.com') {
       return res.status(403).json({ error: 'Only admin can access this' });
     }
 

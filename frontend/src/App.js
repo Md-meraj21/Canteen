@@ -66,11 +66,7 @@ function AppShell() {
       <Header onLoginClick={() => openAuthModal('login')} />
       <main className="w-full flex-1">
         <Routes>
-          {/* If user has pending registration and tries to go to register, show verification pending */}
-          <Route
-            path="/register"
-            element={pendingEmail ? <VerificationPending /> : <Register />}
-          />
+          <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />

@@ -39,6 +39,31 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/backend/, "/api"),
       },
+      "/register-api": {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        rewrite: () => "/api/auth/register",
+      },
+      "/verify-registration-api": {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        rewrite: () => "/api/auth/verify-registration-otp",
+      },
+      "/resend-registration-api": {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        rewrite: () => "/api/auth/resend-registration-otp",
+      },
+      "/forgot-password-api": {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        rewrite: () => "/api/auth/forgot-password",
+      },
+      "/reset-password-api": {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        rewrite: () => "/api/auth/reset-password",
+      },
     },
   },
 });

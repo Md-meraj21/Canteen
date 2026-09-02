@@ -87,7 +87,7 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    await sendOtpEmail({
+    sendOtpEmailInBackground({
       to: normalizedEmail,
       subject: 'Canteen registration OTP',
       otp,
@@ -177,7 +177,7 @@ router.post('/resend-registration-otp', async (req, res) => {
     user.emailOtpExpires = otpExpiry();
     await user.save();
 
-    await sendOtpEmail({
+    sendOtpEmailInBackground({
       to: email,
       subject: 'Canteen registration OTP',
       otp,
@@ -249,7 +249,7 @@ router.post('/forgot-password', async (req, res) => {
       user.resetPasswordOtpExpires = otpExpiry();
       await user.save();
 
-      await sendOtpEmail({
+      sendOtpEmailInBackground({
         to: email,
         subject: 'Canteen password reset OTP',
         otp,
