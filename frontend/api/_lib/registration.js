@@ -74,6 +74,16 @@ const hashOtp = (otp) => crypto
 
 const otpExpiry = () => new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
+const dns = require('dns');
+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+const customLookup = (hostname, options, callback) => {
+  dns.lookup(hostname, { family: 4 }, callback);
+};
+
 const sendOtpEmail = async ({ to, subject, otp, purpose }) => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
@@ -82,30 +92,26 @@ const sendOtpEmail = async ({ to, subject, otp, purpose }) => {
   }
 
   const isGmail = !SMTP_HOST || SMTP_HOST.includes('gmail') || (SMTP_USER && SMTP_USER.includes('@gmail.com'));
+  const host = isGmail ? 'smtp.gmail.com' : (SMTP_HOST || 'smtp.gmail.com');
+  const port = isGmail ? 465 : (Number(SMTP_PORT) || 465);
 
-  const transporter = isGmail
-    ? nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: SMTP_USER,
-          pass: SMTP_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      })
-    : nodemailer.createTransport({
-        host: SMTP_HOST || 'smtp.gmail.com',
-        port: Number(SMTP_PORT) || 465,
-        secure: Number(SMTP_PORT) === 465,
-        auth: {
-          user: SMTP_USER,
-          pass: SMTP_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+    lookup: customLookup,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    dnsTimeout: 5000,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM || SMTP_USER,

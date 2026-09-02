@@ -5,6 +5,10 @@ if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
+const customLookup = (hostname, options, callback) => {
+  dns.lookup(hostname, { family: 4 }, callback);
+};
+
 const createTransporter = () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
@@ -13,29 +17,22 @@ const createTransporter = () => {
   }
 
   const isGmail = !SMTP_HOST || SMTP_HOST.includes('gmail') || (SMTP_USER && SMTP_USER.includes('@gmail.com'));
+  const host = isGmail ? 'smtp.gmail.com' : (SMTP_HOST || 'smtp.gmail.com');
+  const port = isGmail ? 465 : (Number(SMTP_PORT) || 465);
 
-  if (isGmail) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
-
-  const port = Number(SMTP_PORT) || 465;
   return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: port,
+    host,
+    port,
     secure: port === 465,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
+    lookup: customLookup,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    dnsTimeout: 5000,
     tls: {
       rejectUnauthorized: false,
     },
