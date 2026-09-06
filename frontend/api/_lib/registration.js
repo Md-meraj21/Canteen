@@ -81,7 +81,8 @@ if (dns.setDefaultResultOrder) {
 }
 
 const customLookup = (hostname, options, callback) => {
-  dns.lookup(hostname, { family: 4 }, callback);
+  const cb = typeof options === 'function' ? options : callback;
+  dns.lookup(hostname, { family: 4 }, cb);
 };
 
 const sendOtpEmail = async ({ to, subject, otp, purpose }) => {

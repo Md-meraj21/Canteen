@@ -52,25 +52,21 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Name, username, email, phone, and password are required' });
     }
 
-    const existingUser = await User.findOne({
-      $or: [
-        { email: normalizedEmail },
-        { username: normalizedUsername }
-      ]
-    }).select('+emailOtpHash +emailOtpExpires');
+    const [existingEmailUser, existingUsernameUser] = await Promise.all([
+      User.findOne({ email: normalizedEmail }).select('+emailOtpHash +emailOtpExpires'),
+      User.findOne({ username: normalizedUsername }),
+    ]);
 
-    if (existingUser && existingUser.emailVerified) {
-      return res.status(400).json({
-        error: existingUser.email === normalizedEmail ? 'Email already registered' : 'Username already taken'
-      });
+    if (existingEmailUser && existingEmailUser.emailVerified) {
+      return res.status(400).json({ error: 'Email already registered' });
     }
 
-    if (existingUser && existingUser.email !== normalizedEmail) {
+    if (existingUsernameUser && (!existingEmailUser || existingUsernameUser._id.toString() !== existingEmailUser._id.toString())) {
       return res.status(400).json({ error: 'Username already taken' });
     }
 
     const otp = createOtp();
-    const user = existingUser || new User();
+    const user = existingEmailUser || new User();
 
     user.name = name;
     user.email = normalizedEmail;

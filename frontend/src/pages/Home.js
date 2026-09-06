@@ -187,7 +187,11 @@ function Home() {
 
       <section className="mt-3 grid items-start gap-3 sm:mt-8 sm:gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className={`${panel} hidden h-max self-start p-4 lg:block`}>{filters}</aside>
-        <Drawer open={showFilters} onClose={() => setShowFilters(false)} PaperProps={{ className: '!max-w-[90vw]' }}>
+        <Drawer
+          open={showFilters}
+          onClose={() => setShowFilters(false)}
+          slotProps={{ paper: { className: '!max-w-[90vw]' } }}
+        >
           {filters}
         </Drawer>
 

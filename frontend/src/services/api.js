@@ -91,8 +91,8 @@ export const productsAPI = {
 export const locationAPI = {
   search: (query) => api.get('/location/search', { params: { q: query } }),
   reverse: async (lat, lon) => {
-    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-    const apiUrl = import.meta.env.VITE_OPENWEATHER_REVERSE_GEO_API_URL;
+    const rawApiUrl = import.meta.env.VITE_OPENWEATHER_REVERSE_GEO_API_URL;
+    const apiUrl = rawApiUrl ? rawApiUrl.replace(/^http:/, 'https:') : null;
 
     if (apiKey && apiUrl) {
       try {

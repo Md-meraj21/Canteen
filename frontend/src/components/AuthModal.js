@@ -38,9 +38,6 @@ function AuthModal({ open, mode, onModeChange, onClose }) {
       fullWidth
       maxWidth={isWide ? 'md' : 'sm'}
       className="auth-modal"
-      PaperProps={{
-        className: paperClassName,
-      }}
       slotProps={{
         paper: {
           className: paperClassName,
