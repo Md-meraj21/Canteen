@@ -1,0 +1,47 @@
+{
+  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "routes": [
+    {
+      "src": "^/register-api$",
+      "dest": "/api/auth/register.js"
+    },
+    {
+      "src": "^/verify-registration-api$",
+      "dest": "/api/auth/verify-registration-otp.js"
+    },
+    {
+      "src": "^/resend-registration-api$",
+      "dest": "/api/auth/resend-registration-otp.js"
+    },
+    {
+      "src": "^/forgot-password-api$",
+      "dest": "/api/auth/forgot-password.js"
+    },
+    {
+      "src": "^/reset-password-api$",
+      "dest": "/api/auth/reset-password.js"
+    },
+    {
+      "src": "^/backend/location/search$",
+      "dest": "/api/location/search.js"
+    },
+    {
+      "src": "^/backend/(.*)$",
+      "dest": "https://shopcart-tbik.onrender.com/api/$1"
+    },
+    {
+      "src": "^/assets/(.*)$",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "^/(favicon\\.ico|robots\\.txt|manifest\\.json|logo.*|.*\\.(png|jpg|jpeg|svg|webp|ico))$",
+      "dest": "/$1"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/index.html"
+    }
+  ]
+}
