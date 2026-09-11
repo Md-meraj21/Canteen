@@ -40,7 +40,7 @@
     },
     {
       "src": "^/backend/(.*)$",
-      "dest": "https://shopcart-tbik.onrender.com/api/$1"
+      "dest": "https://shop-cart-vgf2.onrender.com/api/$1"
     },
     {
       "src": "^/assets/(.*)$",
